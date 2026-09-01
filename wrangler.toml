@@ -1,0 +1,5 @@
+name = "gruppenwerk-bewertungen"
+main = "dist/worker.js"
+compatibility_date = "2025-09-01"
+
+# Vor dem Deploy: npm run build

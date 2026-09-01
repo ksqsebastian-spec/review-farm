@@ -1,0 +1,30 @@
+{
+  "name": "gruppenwerk-review-farm",
+  "version": "1.0.0",
+  "description": "QR-Bewertungsseite für die Gruppenwerk-Betriebe",
+  "scripts": {
+    "test": "node test/qr.test.mjs",
+    "build": "node build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ksqsebastian-spec/review-farm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ksqsebastian-spec/review-farm/issues"
+  },
+  "homepage": "https://github.com/ksqsebastian-spec/review-farm#readme",
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "jsqr": "^1.4.0",
+    "playwright": "^1.62.1"
+  }
+}
