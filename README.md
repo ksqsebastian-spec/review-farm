@@ -27,10 +27,39 @@ QR-Code zeigen                       Ein Tipp → Google → einfügen, fertig
 Betriebe: `hantke`, `brink`, `seehafer`, `werner-bau`, `werner-geruestbau`,
 `mehlig`, `bsi`, `groundpassion`, `networking`.
 
-## Bewertungstexte
+## Prompt-Modus (Standard)
 
-Die Texte stehen **nicht** als fertige Liste in der Datei. Jeder Aufruf setzt
-einen neuen Text aus vier Bausteinen zusammen (`src/review-text.js`):
+Der Kunde bekommt **keinen fertigen Text**, sondern zwei kurze Fragen:
+
+1. *Was haben wir für Sie gemacht?*
+2. *Was hat Ihnen gefallen?*
+
+Darunter stehen kurze Stichworte zum Antippen (*„Fenster repariert"*,
+*„pünktlich"*, *„in Hamburg"*) — bewusst nur Fragmente, nie fertige Sätze. Aus
+den beiden Antworten wird live die Bewertung zusammengesetzt, die der Kunde vor
+dem Absenden sieht. Der Button bleibt gesperrt, bis wirklich etwas dasteht.
+
+Damit sind die Bewertungen inhaltlich die des Kunden. Gewerk und Ort landen über
+die Stichworte trotzdem im Text, die lokale Suche profitiert also weiterhin.
+
+**Warum nicht der fertige Textvorschlag?** Eine Simulation der alten Variante bei
+realistischem Aufkommen (78 Bewertungen im Jahr, auf neun Betriebe verteilt)
+ergab im schlechtesten Fall 20 wortgleiche Wiederholungen eines Satzes und einen
+Satz, der bei acht der neun Betriebe auftaucht. Google erkennt Beinahe-Duplikate
+auf Satzebene, nicht nur bei ganzen Texten — und identische Sätze über mehrere
+verbundene Betriebe hinweg sind genau das Muster, gegen das vorgegangen wird.
+Geringe Stückzahlen helfen dagegen nicht, weil die Satz-Pools klein sind.
+
+Wichtig für den Ablauf: **der Kunde scannt mit seinem eigenen Handy.** Tippt er
+auf dem Firmenhandy, hängen alle Bewertungen an einem Google-Konto bzw. einem
+Gerät. Wenn der QR-Code nicht gescannt werden kann, den Link über „Link teilen"
+per WhatsApp/SMS schicken.
+
+## Textvorschläge (`?vorschlag=1`, nur zum Vergleich)
+
+Unter `/r/<betrieb>?vorschlag=1` liegt die frühere Variante. Sie stellt
+**nicht** aus einer fertigen Liste zu, sondern setzt pro Aufruf einen neuen Text
+aus vier Bausteinen zusammen (`src/review-text.js`):
 
 1. ein Einstiegssatz zum Auftrag,
 2. eine Bemerkung dazu, wie die Arbeit lief,
@@ -44,10 +73,8 @@ Betrieb**, zusammen gut 57.000. Die Seite wird mit `no-store` ausgeliefert, also
 sieht jeder Kunde einen anderen Text; „Anderer Text" würfelt sofort neu, und der
 Kunde kann vor dem Absenden alles ändern.
 
-Das ist Absicht: Google filtert Bewertungen heraus, die sich stark ähneln –
-identische Texte würden dem Profil eher schaden als nützen. Bewertungen sollten
-außerdem von echten Kunden nach einem echten Auftrag kommen und nicht mit
-Rabatten o. Ä. erkauft werden, sonst drohen Löschung oder eine Sperre des
+Bewertungen sollten von echten Kunden nach einem echten Auftrag kommen und nicht
+mit Rabatten o. Ä. erkauft werden, sonst drohen Löschung oder eine Sperre des
 Profils.
 
 Inhaltlich greifen die Bausteine die Leistungen und die Selbstdarstellung der

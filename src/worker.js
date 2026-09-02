@@ -1,6 +1,6 @@
 import { bySlug } from './companies.js';
 import { logos } from './logos.js';
-import { indexPage, qrPage, reviewPage } from './site.js';
+import { indexPage, qrPage, reviewPage, promptPage } from './site.js';
 
 const html = (body, cache) => new Response(body, {
   headers: {
@@ -36,9 +36,16 @@ export default {
 
     if (path === '/') return html(indexPage(), 'public, max-age=300');
 
-    // The suggestion is generated per request, so this page must never be cached.
+    // Default is prompt mode: the customer writes the review themselves.
+    // ?vorschlag=1 still serves the older generated-suggestion page for comparison;
+    // its text is built per request, so that variant must never be cached.
     const review = path.match(/^\/r\/([a-z0-9-]+)$/);
-    if (review && bySlug[review[1]]) return html(reviewPage(bySlug[review[1]]), 'no-store');
+    if (review && bySlug[review[1]]) {
+      const c = bySlug[review[1]];
+      return url.searchParams.has('vorschlag')
+        ? html(reviewPage(c), 'no-store')
+        : html(promptPage(c), 'public, max-age=300');
+    }
 
     const staff = path.match(/^\/([a-z0-9-]+)$/);
     if (staff && bySlug[staff[1]]) return html(qrPage(bySlug[staff[1]], url.origin), 'public, max-age=300');

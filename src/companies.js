@@ -32,6 +32,10 @@ const CLOSERS = [
   'Wir würden für {kw} jederzeit wieder dort anrufen.',
 ];
 
+// Stichworte für den Prompt-Modus: kurze Fragmente, aus denen der Kunde seinen
+// eigenen Satz baut. Bewusst keine fertigen Sätze — der Text soll von ihm sein.
+const GOOD = ['pünktlich', 'sauber gearbeitet', 'freundlich', 'faire Beratung', 'schnell da', 'gute Qualität'];
+
 export const companies = [
   {
     slug: 'hantke',
@@ -43,6 +47,7 @@ export const companies = [
     logo: 'hantke.svg',
     accent: '#e85230',
     placeId: 'ChIJByqmffSDsUcRSW_ntQJGvpo',
+    hints: { did: ['Wohnung gestrichen', 'Fassade gestrichen', 'tapeziert', 'Boden verlegt', 'nach Wasserschaden', 'Türen lackiert', 'in Hamburg'], good: GOOD },
     open: [
       ['Maler Hantke hat unsere Wohnung komplett gestrichen und tapeziert.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg', 'Tapezierarbeiten in Hamburg'],
       ['Wir haben das Treppenhaus von Maler Hantke neu streichen lassen.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
@@ -75,6 +80,7 @@ export const companies = [
     logo: 'brink.svg',
     accent: '#2745e0',
     placeId: 'ChIJU6-8J1WPsUcRE5wQ-gjjRNE',
+    hints: { did: ['Fenster repariert', 'Dichtungen getauscht', 'Einbruchschutz', 'Notdienst', 'Wartung', 'Tür repariert', 'in Hamburg'], good: GOOD },
     open: [
       ['Die Tischlerei Brink hat unsere alten Holzfenster reparieren statt austauschen können.', 'Fensterreparatur in Hamburg', 'eine Tischlerei in Hamburg'],
       ['Nach einem Einbruchversuch hat Brink unsere Fenster nachgerüstet.', 'Einbruchschutz an Fenstern in Hamburg', 'Fenster und Türen in Hamburg'],
@@ -107,6 +113,7 @@ export const companies = [
     logo: 'seehafer.svg',
     accent: '#ff4202',
     placeId: 'ChIJB1w8uPOIsUcR1Hc8hc9ctGo',
+    hints: { did: ['Türen gewartet', 'Fenster eingebaut', 'Objekttüren', 'Tür repariert', 'Beratung', 'in Hamburg'], good: GOOD },
     open: [
       ['Seehafer Elemente hat die Objekttüren in unserer Wohnanlage erneuert.', 'Objekttüren in Hamburg', 'Türen und Fenster in Hamburg'],
       ['Wir haben die Fenster im ganzen Haus von Seehafer Elemente einbauen lassen.', 'einen Fensterbauer in Hamburg', 'Türen und Fenster in Hamburg'],
@@ -139,6 +146,7 @@ export const companies = [
     logo: 'werner-bau.svg',
     accent: '#d51a29',
     placeId: 'ChIJB1w8uPOIsUcRvkVOcKm1u3A',
+    hints: { did: ['Fassade saniert', 'Wohnung saniert', 'Balkon saniert', 'Klinker ausgebessert', 'Treppenhaus', 'in Hamburg'], good: GOOD },
     open: [
       ['Werner Bau hat die Klinkerfassade unseres Altbaus saniert.', 'Fassadensanierung in Hamburg', 'Altbausanierung in Hamburg'],
       ['Unsere Wohnung wurde von Werner Bau komplett saniert.', 'Gebäudesanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
@@ -171,6 +179,7 @@ export const companies = [
     logo: 'werner-geruestbau.svg',
     accent: '#b8860b',
     placeId: 'ChIJhRygz1SMsUcRyjCvXIrU6AI',
+    hints: { did: ['Haus eingerüstet', 'Fassadengerüst', 'Wetterschutzdach', 'kurzfristig gestellt', 'in Hamburg'], good: GOOD },
     open: [
       ['J. Werner Gerüstbau hat unser Einfamilienhaus eingerüstet.', 'Gerüstbau in Hamburg', 'einen Gerüstbauer in Hamburg'],
       ['Für die Fassadensanierung hat Werner Gerüstbau kurzfristig ein Gerüst gestellt.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
@@ -211,6 +220,7 @@ export const companies = [
     logo: 'mehlig.svg',
     accent: '#c72b16',
     placeId: 'ChIJbbSAYEp-sUcRfGM5cA8YWJo',
+    hints: { did: ['Einbauschrank nach Maß', 'Innenausbau', 'Küche nach Maß', 'Restaurant eingerichtet', 'Büro eingerichtet', 'in Moorrege'], good: GOOD },
     open: [
       ['Die Tischlerei Mehlig hat unseren kompletten Innenausbau umgesetzt.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei in Moorrege'],
       ['Wir haben Einbauschränke nach Maß von der Tischlerei Mehlig bauen lassen.', 'Möbel nach Maß bei Hamburg', 'eine Tischlerei in Moorrege'],
@@ -251,6 +261,7 @@ export const companies = [
     logo: 'bsi.png',
     accent: '#bb1f11',
     placeId: 'ChIJOf0w2FSPsUcRjEHWjKireJw',
+    hints: { did: ['Sanierung geplant', 'Bauleitung', 'Leckortung', 'Bauantrag', 'Dachaufstockung', 'in Hamburg'], good: GOOD },
     open: [
       ['Gruppenwerk BSI hat unsere Dachaufstockung geplant und die Bauleitung übernommen.', 'Bauleitung in Hamburg', 'Sanierungsplanung in Hamburg'],
       ['Die Leckortung von Gruppenwerk BSI hat unseren Wasserschaden punktgenau gefunden.', 'Leckortung in Hamburg', 'Bausanierung in Hamburg'],
@@ -291,6 +302,7 @@ export const companies = [
     logo: 'groundpassion.svg',
     accent: '#2438d6',
     placeId: 'ChIJzzW09luPsUcRlKippaMOOjY',
+    hints: { did: ['Kauf begleitet', 'Objekt geprüft', 'Finanzierung', 'Verkauf begleitet', 'Beratung', 'in Hamburg'], good: GOOD },
     open: [
       ['GroundPassion hat uns beim Kauf unserer ersten Anlageimmobilie begleitet.', 'Anlageimmobilien in Hamburg', 'eine Immobilienberatung in Hamburg'],
       ['Wir haben unsere Investmentstrategie mit GroundPassion entwickelt.', 'Immobilien-Investment in Hamburg', 'eine Immobilienberatung in Hamburg'],
@@ -331,6 +343,7 @@ export const companies = [
     // Kein eigenes Google-Unternehmensprofil gefunden – der Link führt auf die
     // Google-Maps-Suche. Sobald ein Profil existiert, hier die Place ID eintragen.
     placeId: null,
+    hints: { did: ['Schreibtisch gemietet', 'Büro gemietet', 'Meetingräume', 'Coworking', 'in Hamburg'], good: GOOD },
     open: [
       ['Wir sind als kleines Team bei Gruppenwerk Networking eingezogen.', 'Coworking in Hamburg', 'ein Büro in Hamburg'],
       ['Wir arbeiten seit einiger Zeit im Coworking von Gruppenwerk Networking.', 'Coworking in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],

@@ -38,34 +38,52 @@ for (const c of companies) {
   check(logo === `/l/${c.logo}`, `logo ${c.slug} ${logo}`);
 }
 
-// 2. Reloading the review page must produce a different suggestion each time.
-const seen = new Set();
-for (let i = 0; i < 12; i++) {
-  await p.goto(`${BASE}/r/hantke`, { waitUntil: 'domcontentloaded' });
-  seen.add((await p.locator('#quote').innerText()).trim());
-}
-check(seen.size >= 10, `12 Aufrufe -> ${seen.size} verschiedene Texte`);
-
-// 3. "Anderer Text" regenerates client-side without a reload.
-await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
-const before = await p.locator('#quote').innerText();
-await p.locator('#again').click();
-const after = await p.locator('#quote').innerText();
-check(before !== after && after.length > 40, '"Anderer Text" tauscht den Vorschlag');
-
-// 4. The main button copies exactly the shown text and goes straight to Google's
-//    review dialog (placeid URL), not the map listing.
+// 2. Prompt mode: the customer writes the text; the button stays off until they have.
 await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
 await p.route('**://*.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<html>stub</html>' }));
 await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
-const shown = (await p.locator('#quote').innerText()).trim();
+check(await p.locator('#go').isDisabled(), 'Button ist gesperrt, solange nichts eingetragen ist');
+
+await p.locator('.chips').first().locator('.chip').first().click();
+check(await p.locator('#go').isDisabled(), 'ein Stichwort allein reicht nicht');
+
+await p.locator('#a1').fill('Fassade gestrichen und Fenster lackiert');
+await p.locator('#a2').fill('pünktlich, sauber, faire Beratung');
+const preview = (await p.locator('#prev').innerText()).trim();
+check(preview === 'Fassade gestrichen und Fenster lackiert. Pünktlich, sauber, faire Beratung.',
+  `Vorschau: "${preview}"`);
+check(await p.locator('#go').isEnabled(), 'Button ist frei, sobald beide Fragen beantwortet sind');
+
+// 3. Chips only insert short fragments, never finished sentences.
+const frags = await p.locator('.chip').allInnerTexts();
+const longest = frags.reduce((a, b) => (a.length > b.length ? a : b));
+check(!frags.some((f) => /[.!?]$/.test(f)) && longest.length <= 24,
+  `Stichworte sind Fragmente, längstes: "${longest}"`);
+
+// 4. Tapping a chip appends to the right field.
+await p.locator('#a1').fill('');
+await p.locator('.chips').first().locator('.chip').nth(1).click();
+await p.locator('.chips').first().locator('.chip').nth(6).click();
+check((await p.locator('#a1').inputValue()) === 'Fassade gestrichen, in Hamburg', 'Stichworte hängen sich an');
+
+// 5. The button copies exactly the preview and goes to Google's review dialog.
+await p.locator('#a2').fill('sehr pünktlich und sauber');
+const shown = (await p.locator('#prev').innerText()).trim();
 await p.locator('#go').click();
 const clip = await p.evaluate(() => navigator.clipboard.readText()).catch(() => '<unreadable>');
 await p.waitForURL(/google\.com/, { timeout: 6000 }).catch(() => {});
-check(clip.trim() === shown, 'Zwischenablage enthält genau den angezeigten Text');
-check(/search\.google\.com\/local\/writereview\?placeid=/.test(p.url()), `Ziel: ${p.url().slice(0, 72)}`);
+check(clip.trim() === shown, 'Zwischenablage enthält genau die Vorschau');
+check(/search\.google\.com\/local\/writereview\?placeid=/.test(p.url()), `Ziel: ${p.url().slice(0, 70)}`);
 
-// 5. Every company with a placeId links straight to the review dialog.
+// 6. The older generated-suggestion page is still reachable for comparison.
+const seen = new Set();
+for (let i = 0; i < 8; i++) {
+  await p.goto(`${BASE}/r/hantke?vorschlag=1`, { waitUntil: 'domcontentloaded' });
+  seen.add((await p.locator('#quote').innerText()).trim());
+}
+check(seen.size >= 7, `?vorschlag=1 liefert weiter wechselnde Texte (${seen.size}/8)`);
+
+// 7. Every company with a placeId links straight to the review dialog.
 for (const c of companies.filter((x) => x.placeId)) {
   await p.goto(`${BASE}/r/${c.slug}`, { waitUntil: 'domcontentloaded' });
   const href = await p.locator('#plain').getAttribute('href');
