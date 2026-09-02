@@ -1,10 +1,11 @@
 import { bySlug } from './companies.js';
+import { logos } from './logos.js';
 import { indexPage, qrPage, reviewPage } from './site.js';
 
-const html = (body, maxAge) => new Response(body, {
+const html = (body, cache) => new Response(body, {
   headers: {
     'content-type': 'text/html; charset=utf-8',
-    'cache-control': `public, max-age=${maxAge}`,
+    'cache-control': cache,
     'x-content-type-options': 'nosniff',
     'referrer-policy': 'strict-origin-when-cross-origin',
   },
@@ -20,13 +21,27 @@ export default {
         headers: { 'content-type': 'text/plain; charset=utf-8' },
       });
     }
-    if (path === '/') return html(indexPage(), 300);
 
+    const logo = path.match(/^\/l\/([a-z0-9-]+\.(?:svg|png))$/);
+    if (logo && logos[logo[1]]) {
+      const { type, body } = logos[logo[1]];
+      return new Response(body, {
+        headers: {
+          'content-type': type,
+          'cache-control': 'public, max-age=31536000, immutable',
+          'x-content-type-options': 'nosniff',
+        },
+      });
+    }
+
+    if (path === '/') return html(indexPage(), 'public, max-age=300');
+
+    // The suggestion is generated per request, so this page must never be cached.
     const review = path.match(/^\/r\/([a-z0-9-]+)$/);
-    if (review && bySlug[review[1]]) return html(reviewPage(bySlug[review[1]]), 300);
+    if (review && bySlug[review[1]]) return html(reviewPage(bySlug[review[1]]), 'no-store');
 
     const staff = path.match(/^\/([a-z0-9-]+)$/);
-    if (staff && bySlug[staff[1]]) return html(qrPage(bySlug[staff[1]], url.origin), 300);
+    if (staff && bySlug[staff[1]]) return html(qrPage(bySlug[staff[1]], url.origin), 'public, max-age=300');
 
     return Response.redirect(`${url.origin}/`, 302);
   },

@@ -10,6 +10,7 @@ await build({
   format: 'esm',
   target: 'es2022',
   platform: 'neutral',
+  loader: { '.svg': 'text', '.png': 'binary' },
   charset: 'utf8',
   minify: true,
 });

@@ -1,15 +1,36 @@
-// One entry per customer-facing Gruppenwerk company.
+// One entry per Gruppenwerk company with a Google Business Profile.
 //
-// placeId: the Google Place ID of the company's Business Profile. When set, the
-// review link opens Google's "write a review" dialog directly. When null, the
-// link falls back to a Google Maps search for the business, where the customer
-// taps "Rezension schreiben" — one extra tap, but it works with no setup.
-// See README.md for how to look a Place ID up.
+// placeId: verified against Google Maps — each one was resolved back to the
+// business name, website and phone number before being put here. It makes the
+// review link open Google's review dialog directly instead of the map listing.
 //
-// reviews: suggested review texts. Several per company on purpose — Google
-// filters out reviews that are near-duplicates of each other, so everyone
-// handing in the same sentence would defeat the point. Each one is phrased
-// around the services and wording the company uses on its own website.
+// The review suggestions are generated, not picked from a list: see the grammar
+// fields (open / quality / extra / close / kw) and src/review-text.js. Wording is
+// taken from what each company says about itself on its own site.
+
+// Remarks that fit any of the trades.
+const CRAFT_QUALITY = [
+  'Saubere Arbeit und alles termingerecht.',
+  'Pünktlich, freundlich und die Baustelle war jeden Abend besenrein.',
+  'Die Absprachen haben von Anfang bis Ende gestimmt.',
+  'Das Angebot war fair und transparent, keine bösen Überraschungen.',
+  'Man wurde die ganze Zeit auf dem Laufenden gehalten.',
+  'Sehr ordentliche Ausführung und ein freundliches Team.',
+  'Termine wurden eingehalten und die Qualität stimmt.',
+  'Kurzfristig einen Termin bekommen und alles lief reibungslos.',
+  'Vorher in Ruhe beraten worden, danach genau so umgesetzt.',
+  'Sauber gearbeitet und am Ende alles ordentlich hinterlassen.',
+];
+
+const CLOSERS = [
+  'Für {kw} eine klare Empfehlung.',
+  'Können wir für {kw} nur weiterempfehlen.',
+  'Wer {kw} sucht, ist hier richtig.',
+  'Absolut empfehlenswert für {kw}.',
+  'Von uns eine klare Empfehlung für {kw}.',
+  'Gerne wieder – top Adresse für {kw}.',
+  'Wir würden für {kw} jederzeit wieder dort anrufen.',
+];
 
 export const companies = [
   {
@@ -19,15 +40,30 @@ export const companies = [
     trade: 'Malerbetrieb',
     address: 'Bötelkamp 31, 22529 Hamburg',
     site: 'maler-hantke.de',
-    accent: '#e0603a',
-    placeId: null,
-    reviews: [
-      'Maler Hantke hat unsere Wohnung in Hamburg komplett gestrichen und tapeziert. Saubere Arbeit, die Termine wurden eingehalten und die Farbberatung war richtig hilfreich. Klare Empfehlung für einen Malerbetrieb in Hamburg.',
-      'Wir hatten einen Wasserschaden und Maler Hantke hat die Bautrocknung und die anschließende Renovierung übernommen. Schnelle Reaktion, faire Preise, am Ende sah alles besser aus als vorher. Top Malerbetrieb aus Hamburg.',
-      'Fassadenanstrich an unserem Haus in Hamburg – von der Beratung bis zur Ausführung alles top. Das Team arbeitet sauber, pünktlich und denkt mit. Gerne wieder.',
-      'Spachteln, Glätten und die Türen lackieren – Maler Hantke hat alles in einem Rutsch erledigt. Ordentliche Baustelle, freundliche Handwerker, ehrliche Beratung. Für Malerarbeiten in Hamburg absolut zu empfehlen.',
-      'Böden verlegt und Wände gestrichen, alles termingerecht und ohne Diskussionen. Sehr angenehme Zusammenarbeit mit einem zuverlässigen Malerbetrieb in Hamburg.',
+    logo: 'hantke.svg',
+    accent: '#e85230',
+    placeId: 'ChIJByqmffSDsUcRSW_ntQJGvpo',
+    open: [
+      ['Maler Hantke hat unsere Wohnung komplett gestrichen und tapeziert.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg', 'Tapezierarbeiten in Hamburg'],
+      ['Wir haben das Treppenhaus von Maler Hantke neu streichen lassen.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Die Fassade unseres Hauses wurde von Maler Hantke gestrichen.', 'einen Fassadenanstrich in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Wände spachteln und glätten, dann streichen – alles von Maler Hantke.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Maler Hantke hat bei uns Türen und Fenster lackiert.', 'Lackierarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Nach einem Wasserschaden hat Maler Hantke die Bautrocknung und die Renovierung übernommen.', 'Bautrocknung in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Wir haben unser Büro von Maler Hantke neu streichen lassen.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Boden verlegen und Wände streichen – Maler Hantke hat beides gemacht.', 'Bodenverlegung in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Maler Hantke hat unsere Altbauwohnung vor dem Einzug renoviert.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Nach dem Umbau hat Maler Hantke bei uns Malerarbeiten und die Küchenmontage erledigt.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
     ],
+    quality: CRAFT_QUALITY,
+    extra: [
+      'Die Farbberatung vorab war richtig hilfreich.',
+      'Der Meisterbetrieb sitzt in Hamburg-Lokstedt, das ging entsprechend schnell.',
+      'Auch die Kleinigkeiten am Ende wurden ohne Diskussion erledigt.',
+      'Möbel und Böden waren sorgfältig abgeklebt.',
+      'Es wurde ehrlich gesagt, was nötig ist und was nicht.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'brink',
@@ -36,32 +72,62 @@ export const companies = [
     trade: 'Fenster, Türen & Sicherheit',
     address: 'Heselstücken 10, 22453 Hamburg',
     site: 'tischlerei-brink.de',
-    accent: '#2f7d5c',
-    placeId: null,
-    reviews: [
-      'Nach einem Einbruchversuch hat die Tischlerei Brink unsere Fenster gesichert – Pilzzapfenverriegelung nachgerüstet und alles neu eingestellt. Jemand war innerhalb von 24 Stunden da. Sehr zu empfehlen für Fenster und Türen in Hamburg.',
-      'Unsere alten Holzfenster waren an mehreren Stellen morsch. Tischlerei Brink hat sie mit Repair Care repariert statt sie komplett zu tauschen – deutlich günstiger und sieht aus wie neu. Ehrliche Beratung, saubere Tischlerarbeit.',
-      'Türschloss defekt, Notdienst angerufen, am nächsten Tag war jemand vor Ort. Schnell, freundlich und fair abgerechnet. Für Fenster- und Türreparaturen in Hamburg die richtige Adresse.',
-      'Wir lassen als Hausverwaltung regelmäßig die Fenster und Türen von Tischlerei Brink warten. Zuverlässig, gut organisiert, und die Dichtungen werden gleich mit getauscht. Spart uns langfristig richtig Geld.',
-      'Kostenloser Sicherheits-Check gemacht, danach Fenster und Haustür nachgerüstet. Man merkt die jahrzehntelange Erfahrung als Meisterbetrieb. Top Tischlerei in Hamburg.',
+    logo: 'brink.svg',
+    accent: '#2745e0',
+    placeId: 'ChIJU6-8J1WPsUcRE5wQ-gjjRNE',
+    open: [
+      ['Die Tischlerei Brink hat unsere alten Holzfenster reparieren statt austauschen können.', 'Fensterreparatur in Hamburg', 'eine Tischlerei in Hamburg'],
+      ['Nach einem Einbruchversuch hat Brink unsere Fenster nachgerüstet.', 'Einbruchschutz an Fenstern in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Bei uns hat die Tischlerei Brink die Fensterdichtungen komplett getauscht.', 'Fensterreparatur in Hamburg', 'Fensterwartung in Hamburg'],
+      ['Unser Türschloss war defekt – der Notdienst von Brink war am nächsten Tag da.', 'einen Fenster-Notdienst in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Die Tischlerei Brink macht bei uns die jährliche Wartung von Fenstern und Türen.', 'Fensterwartung in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Brink hat morsche Stellen an unseren Fenstern mit Repair Care saniert.', 'Fensterreparatur in Hamburg', 'eine Tischlerei in Hamburg'],
+      ['Wir haben die Haustür von der Tischlerei Brink sichern lassen.', 'Einbruchschutz an Fenstern in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Ein Fenster ließ sich nicht mehr schließen, Brink hat es wieder eingestellt.', 'Fensterreparatur in Hamburg', 'einen Fenster-Notdienst in Hamburg'],
+      ['Als Hausverwaltung lassen wir Fenster und Türen regelmäßig von Brink prüfen.', 'Fensterwartung in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Die Tischlerei Brink hat bei uns eine Innentür angepasst und neu eingebaut.', 'eine Tischlerei in Hamburg', 'Fenster und Türen in Hamburg'],
     ],
+    quality: CRAFT_QUALITY,
+    extra: [
+      'Die Reparatur war deutlich günstiger als neue Fenster.',
+      'Ein Meisterbetrieb, den es in Hamburg seit 1925 gibt – das merkt man.',
+      'Es wurde ehrlich gesagt, was sich lohnt und was nicht.',
+      'Die Dichtungen wurden gleich mit erneuert.',
+      'Innerhalb von 24 Stunden war jemand vor Ort.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'seehafer',
     name: 'Seehafer Elemente',
     legal: 'Alfred Seehafer GmbH',
-    trade: 'Fenster, Türen & Objekttüren',
+    trade: 'Türen, Fenster & Funktionstechnik',
     address: 'Heselstücken 10, 22453 Hamburg',
     site: 'seehafer-elemente.de',
-    accent: '#1f6feb',
-    placeId: null,
-    reviews: [
-      'Seehafer Elemente hat die Objekttüren in unserer Wohnanlage in Hamburg erneuert. Schallschutz und Einbruchschutz sind deutlich besser, die Montage lief reibungslos. Sehr professionelles Team.',
-      'Neue Fenster fürs ganze Haus – von der Beratung über das Aufmaß bis zum Einbau alles aus einer Hand. Saubere Montage, Termine eingehalten. Empfehlenswerter Fensterbauer in Hamburg.',
-      'Wir haben die jährliche Wartung unserer Türen an Seehafer Elemente vergeben. Alles wird ordentlich dokumentiert und kleine Mängel werden direkt behoben. Man merkt, dass die seit Jahrzehnten wissen, was sie tun.',
-      'Reparatur an der Haustür – Beschlag und Dichtung getauscht, die Tür schließt wieder wie neu. Schnelle Terminvergabe und fairer Preis. Danke an das Team von Seehafer Elemente in Hamburg.',
-      'Als Hausverwaltung arbeiten wir seit Jahren mit Seehafer Elemente zusammen. Zuverlässig bei Wartung und Service, gute Erreichbarkeit, saubere Ausführung. Sehr zu empfehlen.',
+    logo: 'seehafer.svg',
+    accent: '#ff4202',
+    placeId: 'ChIJB1w8uPOIsUcR1Hc8hc9ctGo',
+    open: [
+      ['Seehafer Elemente hat die Objekttüren in unserer Wohnanlage erneuert.', 'Objekttüren in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Wir haben die Fenster im ganzen Haus von Seehafer Elemente einbauen lassen.', 'einen Fensterbauer in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Die Wartung unserer Türen läuft seit Jahren über Seehafer Elemente.', 'die Wartung von Türen in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['An unserer Haustür wurden Beschlag und Dichtung von Seehafer Elemente getauscht.', 'Türreparaturen in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Seehafer Elemente hat die Türen in unserer Kita instand gesetzt.', 'Objekttüren in Hamburg', 'Türreparaturen in Hamburg'],
+      ['Als Hausverwaltung geben wir Türen und Fenster an Seehafer Elemente.', 'die Wartung von Türen in Hamburg', 'Objekttüren in Hamburg'],
+      ['Der Türschließer im Treppenhaus wurde von Seehafer Elemente neu eingestellt.', 'Türreparaturen in Hamburg', 'die Wartung von Türen in Hamburg'],
+      ['Seehafer Elemente hat uns bei Brandschutztüren beraten und sie eingebaut.', 'Objekttüren in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Wir haben die Fenster in unserem Hotel von Seehafer Elemente warten lassen.', 'die Wartung von Türen in Hamburg', 'einen Fensterbauer in Hamburg'],
+      ['Nach einem Schaden hat Seehafer Elemente unsere Tür kurzfristig repariert.', 'Türreparaturen in Hamburg', 'Türen und Fenster in Hamburg'],
     ],
+    quality: CRAFT_QUALITY,
+    extra: [
+      'Wir haben einen festen Ansprechpartner, das macht vieles einfacher.',
+      'Der Termin kam innerhalb von zwei Wochen zustande.',
+      'Alles wird ordentlich dokumentiert.',
+      'Man merkt, dass der Betrieb seit 1948 in Hamburg arbeitet.',
+      'Kleinere Mängel wurden direkt mit erledigt.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'werner-bau',
@@ -70,15 +136,30 @@ export const companies = [
     trade: 'Fassaden- & Gebäudesanierung',
     address: 'Heselstücken 10, 22453 Hamburg',
     site: 'werner-bau.eu',
-    accent: '#8a5a2b',
-    placeId: null,
-    reviews: [
-      'Werner Bau hat die Fassade unseres Altbaus in Hamburg saniert. Die Klinkerarbeiten sind top ausgeführt, die Baustelle war immer sauber und die Kommunikation vorbildlich. Für Fassadensanierung in Hamburg eine klare Empfehlung.',
-      'Komplette Wohnungssanierung über Werner Bau – alle Gewerke aus einer Hand koordiniert. Der Zeitplan wurde gehalten und die Qualität stimmt. Sehr erfahrenes Bauunternehmen.',
-      'Balkonsanierung an unserem Mehrfamilienhaus. Die Ursache wurde vorher sauber analysiert statt einfach drüberzustreichen – genau so soll es sein. Ehrliche und qualifizierte Bauunternehmung aus Hamburg.',
-      'Wir haben mit Werner Bau ein öffentliches Gebäude saniert. Zuverlässig, VOB-sicher und fachlich stark bei historischen Klinkerfassaden. Gerne wieder.',
-      'Gebäudesanierung inklusive Putz-, Maler- und Fliesenarbeiten. Ein Ansprechpartner für alles, klare Absprachen und ein sehr gutes Ergebnis. Empfehlenswert.',
+    logo: 'werner-bau.svg',
+    accent: '#d51a29',
+    placeId: 'ChIJB1w8uPOIsUcRvkVOcKm1u3A',
+    open: [
+      ['Werner Bau hat die Klinkerfassade unseres Altbaus saniert.', 'Fassadensanierung in Hamburg', 'Altbausanierung in Hamburg'],
+      ['Unsere Wohnung wurde von Werner Bau komplett saniert.', 'Gebäudesanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
+      ['Die Balkone an unserem Mehrfamilienhaus hat Werner Bau instand gesetzt.', 'Balkonsanierung in Hamburg', 'Gebäudesanierung in Hamburg'],
+      ['Werner Bau hat bei uns Putz- und Maurerarbeiten an der Fassade ausgeführt.', 'Fassadensanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
+      ['Wir haben ein öffentliches Gebäude mit Werner Bau saniert.', 'ein Bauunternehmen in Hamburg', 'Gebäudesanierung in Hamburg'],
+      ['Werner Bau hat die Sanierung unseres Gewerbeobjekts übernommen.', 'Gebäudesanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
+      ['Nach Feuchteschäden hat Werner Bau die Fassade wieder hergerichtet.', 'Fassadensanierung in Hamburg', 'Gebäudesanierung in Hamburg'],
+      ['Die Sanierung unseres Treppenhauses lief komplett über Werner Bau.', 'Gebäudesanierung in Hamburg', 'Altbausanierung in Hamburg'],
+      ['Werner Bau hat bei uns alle Gewerke koordiniert – von Putz bis Fliesen.', 'ein Bauunternehmen in Hamburg', 'Gebäudesanierung in Hamburg'],
+      ['Wir haben eine denkmalgeschützte Fassade von Werner Bau sanieren lassen.', 'Fassadensanierung in Hamburg', 'Altbausanierung in Hamburg'],
     ],
+    quality: CRAFT_QUALITY,
+    extra: [
+      'Die Ursache wurde vorher analysiert, statt einfach drüberzustreichen.',
+      'Ein Ansprechpartner für alles – das hat viel Abstimmung gespart.',
+      'Der Betrieb ist VOB-präqualifiziert, das war für uns wichtig.',
+      'Bei den historischen Klinkerfassaden merkt man die Erfahrung.',
+      'Der Zeitplan wurde trotz Umfang gehalten.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'werner-geruestbau',
@@ -87,15 +168,38 @@ export const companies = [
     trade: 'Gerüstbau',
     address: 'Werner-Siemens-Str. 105, 22113 Hamburg',
     site: 'j-werner-geruestbau.de',
-    accent: '#c9911d',
-    placeId: null,
-    reviews: [
-      'J. Werner Gerüstbau hat unser Einfamilienhaus in Hamburg eingerüstet. Aufbau pünktlich, das Gerüst stand sicher, Abbau nach Absprache sofort. Unkompliziert und zuverlässig.',
-      'Für unsere Fassadensanierung brauchten wir kurzfristig ein Gerüst – Werner Gerüstbau war innerhalb weniger Tage vor Ort. Faires Angebot, saubere Ausführung. Empfehlung für Gerüstbau in Hamburg.',
-      'Wetterschutzdach über die Baustelle, alles fachgerecht geplant und montiert. Man merkt die jahrzehntelange Erfahrung. Sehr guter Gerüstbauer aus Hamburg.',
-      'Großes Wohnprojekt eingerüstet – Termintreue und Sicherheit waren top, Rückfragen wurden sofort geklärt. Sehr angenehme Zusammenarbeit.',
-      'Gerüst für ein öffentliches Gebäude, alles nach Vorschrift und ohne Verzögerung. Zuverlässiger Partner für Gerüstbau in Hamburg.',
+    logo: 'werner-geruestbau.svg',
+    accent: '#b8860b',
+    placeId: 'ChIJhRygz1SMsUcRyjCvXIrU6AI',
+    open: [
+      ['J. Werner Gerüstbau hat unser Einfamilienhaus eingerüstet.', 'Gerüstbau in Hamburg', 'einen Gerüstbauer in Hamburg'],
+      ['Für die Fassadensanierung hat Werner Gerüstbau kurzfristig ein Gerüst gestellt.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
+      ['Werner Gerüstbau hat ein Wetterschutzdach über unsere Baustelle gebaut.', 'ein Wetterschutzdach in Hamburg', 'einen Gerüstbauer in Hamburg'],
+      ['Unser Wohnprojekt wurde von J. Werner Gerüstbau eingerüstet.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
+      ['Werner Gerüstbau hat das Gerüst für unsere Dachsanierung gestellt.', 'Gerüstbau in Hamburg', 'einen Gerüstbauer in Hamburg'],
+      ['Für ein öffentliches Gebäude hat Werner Gerüstbau das Gerüst gestellt.', 'Gerüstbau in Hamburg', 'Fassadengerüste in Hamburg'],
+      ['Wir haben eine Sonderkonstruktion von Werner Gerüstbau bauen lassen.', 'einen Gerüstbauer in Hamburg', 'Gerüstbau in Hamburg'],
+      ['Das Gerüst für unsere Klinkerfassade kam von J. Werner Gerüstbau.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
+      ['Werner Gerüstbau hat auf- und nach Absprache sofort wieder abgebaut.', 'Gerüstbau in Hamburg', 'Gerüste im Hamburger Umland'],
+      ['Wir haben für unser Bauvorhaben mit J. Werner Gerüstbau gearbeitet.', 'Gerüstbau in Hamburg', 'Gerüste im Hamburger Umland'],
     ],
+    quality: [
+      'Aufbau pünktlich, das Gerüst stand sicher, Abbau nach Absprache sofort.',
+      'Unkompliziert, zuverlässig und faires Angebot.',
+      'Die Absprachen haben von Anfang bis Ende gestimmt.',
+      'Termintreue und Sicherheit waren top.',
+      'Rückfragen wurden sofort geklärt.',
+      'Angebot kam schnell und war transparent.',
+      'Sehr angenehme Zusammenarbeit von der Anfrage bis zum Abbau.',
+      'Alles nach Vorschrift und ohne Verzögerung.',
+    ],
+    extra: [
+      'Präqualifiziert nach VOB und voll versichert – das war für uns Voraussetzung.',
+      'Man merkt, dass der Betrieb seit 1976 in Hamburg Gerüste baut.',
+      'Auch kurzfristige Änderungen waren kein Problem.',
+      'Das Gerüst war jederzeit sicher begehbar.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'mehlig',
@@ -104,15 +208,38 @@ export const companies = [
     trade: 'Innenausbau & Objekteinrichtung',
     address: 'Beesenweide 14, 25436 Moorrege',
     site: 'mehlig-gmbh.de',
-    accent: '#6b4fa3',
-    placeId: null,
-    reviews: [
-      'Die Tischlerei Mehlig hat unseren kompletten Innenausbau umgesetzt – Einbauschränke nach Maß, perfekt verarbeitet. Handwerklich auf höchstem Niveau. Empfehlung für Innenausbau im Raum Hamburg und Pinneberg.',
-      'Wir haben unser Restaurant von Mehlig einrichten lassen. Vom Entwurf bis zur Montage alles aus einer Hand, Termine wurden gehalten und die Qualität ist außergewöhnlich.',
-      'Maßmöbel für unser Wohnzimmer – Beratung, Materialauswahl und Ausführung waren erstklassig. Diskret, sauber und absolut zuverlässig. Top Tischlerei in Moorrege.',
-      'Büroeinrichtung durch die Tischlerei Mehlig. Individuelle Lösungen statt Standard von der Stange, alles perfekt eingepasst. Sehr zu empfehlen für Objekteinrichtung.',
-      'Exklusiver Innenausbau für unser Hotel, termingerecht und in hervorragender Qualität umgesetzt. Ein Tischlerbetrieb, dem man große Projekte bedenkenlos anvertrauen kann.',
+    logo: 'mehlig.svg',
+    accent: '#c72b16',
+    placeId: 'ChIJbbSAYEp-sUcRfGM5cA8YWJo',
+    open: [
+      ['Die Tischlerei Mehlig hat unseren kompletten Innenausbau umgesetzt.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei in Moorrege'],
+      ['Wir haben Einbauschränke nach Maß von der Tischlerei Mehlig bauen lassen.', 'Möbel nach Maß bei Hamburg', 'eine Tischlerei in Moorrege'],
+      ['Unser Restaurant wurde von Mehlig eingerichtet.', 'Objekteinrichtung im Raum Hamburg', 'Innenausbau im Raum Hamburg'],
+      ['Die Tischlerei Mehlig hat unsere Büroeinrichtung gebaut und montiert.', 'Objekteinrichtung im Raum Hamburg', 'Möbel nach Maß bei Hamburg'],
+      ['Für unser Hotel hat Mehlig den Innenausbau übernommen.', 'Innenausbau im Raum Hamburg', 'Objekteinrichtung im Raum Hamburg'],
+      ['Maßmöbel fürs Wohnzimmer – gebaut von der Tischlerei Mehlig.', 'Möbel nach Maß bei Hamburg', 'eine Tischlerei im Kreis Pinneberg'],
+      ['Die Tischlerei Mehlig hat unsere Küche nach Maß gefertigt.', 'Möbel nach Maß bei Hamburg', 'eine Tischlerei in Moorrege'],
+      ['Wir haben unseren Ladenbau von Mehlig machen lassen.', 'Objekteinrichtung im Raum Hamburg', 'Innenausbau im Raum Hamburg'],
+      ['Mehlig hat bei uns Wandverkleidungen und Einbauten gefertigt.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei im Kreis Pinneberg'],
+      ['Vom Entwurf bis zur Montage lief alles über die Tischlerei Mehlig.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei in Moorrege'],
     ],
+    quality: [
+      'Handwerklich auf einem sehr hohen Niveau verarbeitet.',
+      'Termine wurden gehalten und die Qualität ist außergewöhnlich.',
+      'Beratung, Materialauswahl und Ausführung waren erstklassig.',
+      'Alles millimetergenau eingepasst.',
+      'Diskret, sauber und absolut zuverlässig.',
+      'Sehr sorgfältig gearbeitet, bis ins Detail.',
+      'Die Absprachen haben von Anfang bis Ende gestimmt.',
+      'Individuelle Lösungen statt Standard von der Stange.',
+    ],
+    extra: [
+      'Auch Sonderwünsche waren kein Problem.',
+      'Die Montage vor Ort lief völlig unkompliziert.',
+      'Man kann dem Betrieb auch größere Projekte bedenkenlos anvertrauen.',
+      'Die Werkstatt in Moorrege ist einen Besuch wert.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'bsi',
@@ -121,15 +248,38 @@ export const companies = [
     trade: 'Sanierung, Planung & Leckortung',
     address: 'Bötelkamp 31, 22529 Hamburg',
     site: 'gruppenwerk-bau.de',
-    accent: '#3d7a8c',
-    placeId: null,
-    reviews: [
-      'Gruppenwerk BSI hat unsere Dachaufstockung geplant und die Bauleitung übernommen. Der Bauantrag lief reibungslos und die Kosten blieben im Rahmen. Sehr kompetente Sanierungsplanung in Hamburg.',
-      'Wasserschaden mit unklarer Ursache – die Leckortung von Gruppenwerk BSI hat die Stelle punktgenau gefunden, ohne die halbe Wohnung aufzureißen. Schnell und professionell.',
-      'Komplettsanierung unserer Wohnung in vier Wochen, koordiniert von Gruppenwerk BSI. Klare Ansagen, realistische Termine, gutes Ergebnis. Empfehlenswert für Bausanierung in Hamburg.',
-      'Von der Bestandsaufnahme über den Bauantrag bis zur fertigen Sanierung alles aus einer Hand. Man wird gut informiert und muss sich um nichts kümmern. Danke!',
-      'Umbau und Ausbau unseres Gebäudes professionell begleitet. Erfahrene Bauleitung, verlässliche Planung und ehrliche Kostenschätzung. Gerne wieder.',
+    logo: 'bsi.png',
+    accent: '#bb1f11',
+    placeId: 'ChIJOf0w2FSPsUcRjEHWjKireJw',
+    open: [
+      ['Gruppenwerk BSI hat unsere Dachaufstockung geplant und die Bauleitung übernommen.', 'Bauleitung in Hamburg', 'Sanierungsplanung in Hamburg'],
+      ['Die Leckortung von Gruppenwerk BSI hat unseren Wasserschaden punktgenau gefunden.', 'Leckortung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Unsere Wohnung wurde von Gruppenwerk BSI komplett saniert.', 'Bausanierung in Hamburg', 'Sanierungsplanung in Hamburg'],
+      ['Gruppenwerk BSI hat für uns den Bauantrag gestellt und begleitet.', 'einen Bauantrag in Hamburg', 'Sanierungsplanung in Hamburg'],
+      ['Vom Aufmaß bis zur fertigen Sanierung lief alles über Gruppenwerk BSI.', 'Bausanierung in Hamburg', 'Bauleitung in Hamburg'],
+      ['Gruppenwerk BSI hat den Umbau unseres Gebäudes geplant und betreut.', 'Sanierungsplanung in Hamburg', 'Bauleitung in Hamburg'],
+      ['Wir haben die Bestandsaufnahme unserer Immobilie von Gruppenwerk BSI machen lassen.', 'Sanierungsplanung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Der Ausbau unseres Dachgeschosses wurde von Gruppenwerk BSI gesteuert.', 'Bauleitung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Gruppenwerk BSI hat die Sanierung unseres Mehrfamilienhauses koordiniert.', 'Bausanierung in Hamburg', 'Bauleitung in Hamburg'],
+      ['Bei unklarer Feuchtigkeit hat Gruppenwerk BSI die Ursache gefunden.', 'Leckortung in Hamburg', 'Bausanierung in Hamburg'],
     ],
+    quality: [
+      'Klare Ansagen, realistische Termine und ein gutes Ergebnis.',
+      'Die Kosten sind im Rahmen geblieben.',
+      'Man wird gut informiert und muss sich um nichts kümmern.',
+      'Sehr strukturierte Planung und verlässliche Bauleitung.',
+      'Die Absprachen haben von Anfang bis Ende gestimmt.',
+      'Ehrliche Kostenschätzung ohne Schönrechnen.',
+      'Alles aus einer Hand, das hat viel Abstimmung gespart.',
+      'Schnell vor Ort und sauber gearbeitet.',
+    ],
+    extra: [
+      'Die Leckortung lief ohne die halbe Wohnung aufzureißen.',
+      'Der Bauantrag ist reibungslos durchgegangen.',
+      'Es wurde ehrlich gesagt, was sich lohnt und was nicht.',
+      'Auch die Handwerker vor Ort waren gut organisiert.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'groundpassion',
@@ -138,14 +288,36 @@ export const companies = [
     trade: 'Immobilien-Investment',
     address: 'Bötelkamp 31, 22529 Hamburg',
     site: 'groundpassion.de',
-    accent: '#2f6b4f',
-    placeId: null,
-    reviews: [
-      'GroundPassion hat uns beim Kauf unserer ersten Anlageimmobilie begleitet. Der Quick-Check war ehrlich – auch bei Objekten, von denen abgeraten wurde. Sehr seriöse Immobilienberatung in Hamburg.',
-      'Von der Investmentstrategie über die Finanzierung bis zur Vermietung alles begleitet. Das Team denkt langfristig, statt schnell etwas verkaufen zu wollen. Klare Empfehlung.',
-      'Wir haben unser Portfolio mit GroundPassion optimiert und ein Objekt erfolgreich verkauft. Fundierte Analysen, realistische Zahlen, kein Verkaufsdruck. Top Beratung rund um Immobilien-Investment.',
-      'Sehr gute Begleitung bei Standortanalyse und Due Diligence. Man bekommt Fakten statt Versprechen. Für Kapitalanlagen in Hamburg absolut empfehlenswert.',
+    logo: 'groundpassion.svg',
+    accent: '#2438d6',
+    placeId: 'ChIJzzW09luPsUcRlKippaMOOjY',
+    open: [
+      ['GroundPassion hat uns beim Kauf unserer ersten Anlageimmobilie begleitet.', 'Anlageimmobilien in Hamburg', 'eine Immobilienberatung in Hamburg'],
+      ['Wir haben unsere Investmentstrategie mit GroundPassion entwickelt.', 'Immobilien-Investment in Hamburg', 'eine Immobilienberatung in Hamburg'],
+      ['GroundPassion hat unser Portfolio durchgerechnet und optimiert.', 'Immobilien-Investment in Hamburg', 'Kapitalanlagen in Hamburg'],
+      ['Beim Verkauf unserer Wohnung wurden wir von GroundPassion beraten.', 'eine Immobilienberatung in Hamburg', 'Anlageimmobilien in Hamburg'],
+      ['Die Objektsuche und die Prüfung liefen über GroundPassion.', 'Anlageimmobilien in Hamburg', 'eine Immobilienberatung in Hamburg'],
+      ['GroundPassion hat uns bei Finanzierung und Vermietung unterstützt.', 'Kapitalanlagen in Hamburg', 'Immobilien-Investment in Hamburg'],
+      ['Wir haben den Immobilien-Quick-Check von GroundPassion genutzt.', 'eine Immobilienberatung in Hamburg', 'Anlageimmobilien in Hamburg'],
+      ['GroundPassion begleitet unsere Kapitalanlage seit dem Kauf.', 'Kapitalanlagen in Hamburg', 'Immobilien-Investment in Hamburg'],
+      ['Die Standortanalyse für unser Objekt kam von GroundPassion.', 'Anlageimmobilien in Hamburg', 'Immobilien-Investment in Hamburg'],
+      ['Wir haben uns von GroundPassion zu einem Objekt in Hamburg beraten lassen.', 'eine Immobilienberatung in Hamburg', 'Kapitalanlagen in Hamburg'],
     ],
+    quality: [
+      'Fundierte Analysen, realistische Zahlen und kein Verkaufsdruck.',
+      'Man bekommt Fakten statt Versprechen.',
+      'Auch bei Objekten, die nichts taugen, wurde ehrlich abgeraten.',
+      'Es wird langfristig gedacht statt schnell verkauft.',
+      'Die Absprachen haben von Anfang bis Ende gestimmt.',
+      'Sehr transparent, jede Zahl war nachvollziehbar.',
+      'Erreichbar, verlässlich und gut vorbereitet.',
+    ],
+    extra: [
+      'Die Rückmeldung zum Objekt kam sehr schnell.',
+      'Auch nach dem Kauf war jemand ansprechbar.',
+      'Die Finanzierung wurde gleich mit durchgerechnet.',
+    ],
+    close: CLOSERS,
   },
   {
     slug: 'networking',
@@ -154,14 +326,34 @@ export const companies = [
     trade: 'Coworking für Bau & Immobilien',
     address: 'Bötelkamp 31, 22529 Hamburg',
     site: 'gruppenwerk-networking.de',
-    accent: '#a13d6b',
+    logo: 'networking.png',
+    accent: '#7ba800',
+    // Kein eigenes Google-Unternehmensprofil gefunden – der Link führt auf die
+    // Google-Maps-Suche. Sobald ein Profil existiert, hier die Place ID eintragen.
     placeId: null,
-    reviews: [
-      'Super Coworking Space in Hamburg mit echtem Branchenfokus – hier sitzen Leute aus Bau, Immobilien und Architektur zusammen. Daraus sind bei uns schon mehrere Projekte entstanden.',
-      'Modernes Büro, schnelles Internet, gute Meetingräume und eine angenehme Lounge. Monatlich kündbar, und man kann jederzeit Plätze dazunehmen. Sehr empfehlenswert.',
-      'Wir sind als kleines Team eingezogen und fühlen uns sehr wohl. Freundliche Betreuung, gute Ausstattung und ein Netzwerk, das wirklich etwas bringt. Top Coworking in Hamburg.',
-      'Schöne Räume, faire Konditionen und echte Kontakte in die Bau- und Immobilienbranche. Deutlich besser als ein anonymes Großraumbüro.',
+    open: [
+      ['Wir sind als kleines Team bei Gruppenwerk Networking eingezogen.', 'Coworking in Hamburg', 'ein Büro in Hamburg'],
+      ['Wir arbeiten seit einiger Zeit im Coworking von Gruppenwerk Networking.', 'Coworking in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],
+      ['Gruppenwerk Networking ist unser Büro in Hamburg geworden.', 'ein Büro in Hamburg', 'einen Büroplatz in Hamburg'],
+      ['Wir haben hier einen Schreibtisch im Coworking gemietet.', 'einen Büroplatz in Hamburg', 'Coworking in Hamburg'],
+      ['Als Freiberufler sitze ich bei Gruppenwerk Networking.', 'einen Büroplatz in Hamburg', 'Coworking in Hamburg'],
+      ['Unser Start-up hat bei Gruppenwerk Networking Büroräume bezogen.', 'ein Büro in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],
+      ['Wir nutzen die Meetingräume von Gruppenwerk Networking regelmäßig.', 'Coworking in Hamburg', 'ein Büro in Hamburg'],
     ],
+    quality: [
+      'Modernes Büro, schnelles Internet und gute Meetingräume.',
+      'Freundliche Betreuung und eine gute Ausstattung.',
+      'Monatlich kündbar, und man kann jederzeit Plätze dazunehmen.',
+      'Schöne Räume und faire Konditionen.',
+      'Angenehme Lounge und eine gut ausgestattete Küche.',
+      'Deutlich besser als ein anonymes Großraumbüro.',
+    ],
+    extra: [
+      'Der Branchenfokus bringt wirklich etwas – hier sitzen Leute aus Bau, Immobilien und Architektur.',
+      'Aus den Kontakten sind bei uns schon mehrere Projekte entstanden.',
+      'Man kommt hier leicht mit anderen ins Gespräch.',
+    ],
+    close: CLOSERS,
   },
 ];
 
@@ -171,5 +363,5 @@ export const bySlug = Object.fromEntries(companies.map((c) => [c.slug, c]));
 export function reviewUrl(c) {
   return c.placeId
     ? `https://search.google.com/local/writereview?placeid=${encodeURIComponent(c.placeId)}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${c.gmbName || c.name} ${c.address}`)}`;
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${c.name} ${c.address}`)}`;
 }

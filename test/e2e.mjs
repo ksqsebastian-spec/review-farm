@@ -1,10 +1,10 @@
 import { chromium } from 'playwright';
 import jsQR from 'jsqr';
 import { PNG } from 'pngjs';
-import { companies } from '../src/companies.js';
-
 import { createServer } from 'node:http';
 import worker from '../dist/worker.js';
+import { companies } from '../src/companies.js';
+import { buildReview } from '../src/review-text.js';
 
 const PORT = 8788;
 const BASE = `http://localhost:${PORT}`;
@@ -20,51 +20,66 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const p = await ctx.newPage();
 const errs = [];
+const bad = [];
 p.on('pageerror', (e) => errs.push(String(e)));
 p.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
+p.on('response', (r) => { if (r.status() >= 400) bad.push(`${r.status()} ${r.url()}`); });
 
 let fail = 0;
+const check = (ok, msg) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${msg}`); if (!ok) fail++; };
+
+// 1. Every QR code must scan back to that company's own review page.
 for (const c of companies) {
   await p.goto(`${BASE}/${c.slug}`, { waitUntil: 'networkidle' });
-  const buf = await p.locator('.qrcard').screenshot();
-  const png = PNG.sync.read(buf);
+  const png = PNG.sync.read(await p.locator('.qr').screenshot());
   const got = jsQR(new Uint8ClampedArray(png.data), png.width, png.height);
-  const want = `${BASE}/r/${c.slug}`;
-  const ok = got && got.data === want;
-  if (!ok) { fail++; console.log(`SCAN FAIL ${c.slug}: got ${got ? JSON.stringify(got.data) : 'null'} want ${want}`); }
-  else console.log(`scan OK  ${c.slug.padEnd(18)} -> ${got.data}`);
+  check(got && got.data === `${BASE}/r/${c.slug}`, `QR ${c.slug} -> ${got ? got.data : 'null'}`);
+  const logo = await p.locator('.logo').getAttribute('src');
+  check(logo === `/l/${c.logo}`, `logo ${c.slug} ${logo}`);
 }
 
-// The customer page: tapping a suggestion must copy the text and navigate to Google.
-await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
-// The sandbox can't reach google.com, so stub it to observe where the tap sends the customer.
-await p.route('**://*.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<html><body>google stub</body></html>' }));
+// 2. Reloading the review page must produce a different suggestion each time.
+const seen = new Set();
+for (let i = 0; i < 12; i++) {
+  await p.goto(`${BASE}/r/hantke`, { waitUntil: 'domcontentloaded' });
+  seen.add((await p.locator('#quote').innerText()).trim());
+}
+check(seen.size >= 10, `12 Aufrufe -> ${seen.size} verschiedene Texte`);
+
+// 3. "Anderer Text" regenerates client-side without a reload.
 await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
-const visible = await p.locator('.tcard:visible').count();
-const shownText = await p.locator('.tcard:visible').first().locator('p').innerText();
-await p.locator('.tcard:visible').first().click();
-// Read the clipboard while still on our own origin — the tap navigates away after ~700ms,
-// and reading it on the google.com origin would block on a permission prompt.
+const before = await p.locator('#quote').innerText();
+await p.locator('#again').click();
+const after = await p.locator('#quote').innerText();
+check(before !== after && after.length > 40, '"Anderer Text" tauscht den Vorschlag');
+
+// 4. The main button copies exactly the shown text and goes straight to Google's
+//    review dialog (placeid URL), not the map listing.
+await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
+await p.route('**://*.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<html>stub</html>' }));
+await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
+const shown = (await p.locator('#quote').innerText()).trim();
+await p.locator('#go').click();
 const clip = await p.evaluate(() => navigator.clipboard.readText()).catch(() => '<unreadable>');
 await p.waitForURL(/google\.com/, { timeout: 6000 }).catch(() => {});
-const landed = p.url();
-console.log(`\nsuggestions visible: ${visible}`);
-console.log(`copied text matches the tapped card: ${clip.trim() === shownText.trim()}`);
-console.log(`tap sends customer to: ${landed.slice(0, 80)}`);
-if (visible !== 3) { console.log('FAIL expected 3 suggestions'); fail++; }
-if (clip.trim() !== shownText.trim()) { console.log('FAIL clipboard mismatch'); fail++; }
-if (!/google\.com/.test(landed)) { console.log('FAIL did not reach Google'); fail++; }
+check(clip.trim() === shown, 'Zwischenablage enthält genau den angezeigten Text');
+check(/search\.google\.com\/local\/writereview\?placeid=/.test(p.url()), `Ziel: ${p.url().slice(0, 72)}`);
 
-// "Andere Vorschläge" must swap the set.
-await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
-const before = await p.locator('.tcard:visible p').allInnerTexts();
-await p.locator('#more').click();
-const after = await p.locator('.tcard:visible p').allInnerTexts();
-const swapped = JSON.stringify(before) !== JSON.stringify(after) && after.length === 3;
-console.log(`"andere Vorschläge" swaps set: ${swapped}`);
-if (!swapped) { console.log('FAIL rotation'); fail++; }
+// 5. Every company with a placeId links straight to the review dialog.
+for (const c of companies.filter((x) => x.placeId)) {
+  await p.goto(`${BASE}/r/${c.slug}`, { waitUntil: 'domcontentloaded' });
+  const href = await p.locator('#plain').getAttribute('href');
+  check(href.includes(`writereview?placeid=${c.placeId}`), `direkter Review-Link ${c.slug}`);
+}
 
-if (errs.length) { console.log('\nJS ERRORS:\n' + errs.join('\n')); fail++; }
+// 6. Generated text must never contain an unreplaced placeholder.
+let holes = 0;
+for (const c of companies) for (let i = 0; i < 300; i++) if (buildReview(c, Math.random).includes('{')) holes++;
+check(holes === 0, `2700 Texte ohne Platzhalter-Reste (${holes} Treffer)`);
+
+if (bad.length) { console.log('HTTP-Fehler:\n' + bad.join('\n')); fail++; }
+if (errs.length) { console.log('JS-Fehler:\n' + errs.join('\n')); fail++; }
 await b.close();
-console.log(fail ? `\n${fail} FAILURE(S)` : '\nE2E OK');
+server.close();
+console.log(fail ? `\n${fail} FEHLER` : '\nE2E OK');
 process.exit(fail ? 1 : 0);
