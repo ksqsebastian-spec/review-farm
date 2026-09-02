@@ -38,50 +38,57 @@ for (const c of companies) {
   check(logo === `/l/${c.logo}`, `logo ${c.slug} ${logo}`);
 }
 
-// 2. Prompt mode: the customer writes the text; the button stays off until they have.
+// 2. Standard: jeder Aufruf liefert einen anderen Vorschlag.
+const seen = new Set();
+for (let i = 0; i < 15; i++) {
+  await p.goto(`${BASE}/r/hantke`, { waitUntil: 'domcontentloaded' });
+  seen.add((await p.locator('#quote').innerText()).trim());
+}
+check(seen.size >= 14, `15 Aufrufe -> ${seen.size} verschiedene Texte`);
+
+// 3. Kein Baustein taucht bei zwei Betrieben auf - das ist die eigentliche Absicherung.
+const owner = new Map();
+let shared = 0;
+for (const c of companies) {
+  for (const s of [...c.quality, ...c.recommend, ...c.closer, ...(c.extra || []), ...c.open.map((o) => o[0])]) {
+    if (owner.has(s) && owner.get(s) !== c.slug) shared++;
+    owner.set(s, c.slug);
+  }
+}
+check(shared === 0, `keine gemeinsamen Bausteine zwischen Betrieben (${shared})`);
+
+// 4. Texte enthalten nie einen unersetzten Platzhalter und sind vollständige Sätze.
+let broken = 0;
+for (const c of companies) {
+  for (let i = 0; i < 400; i++) {
+    const t = buildReview(c, Math.random);
+    if (t.includes('{') || !/[.!?]$/.test(t) || /\s\s/.test(t) || t.length < 60) broken++;
+  }
+}
+check(broken === 0, `3600 Texte ohne Platzhalter, doppelte Leerzeichen oder Bruchstücke (${broken})`);
+
+// 5. "Anderer Text" tauscht den Vorschlag ohne Neuladen.
+await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
+const before = await p.locator('#quote').innerText();
+await p.locator('#again').click();
+const after = await p.locator('#quote').innerText();
+check(before !== after && after.length > 60, '"Anderer Text" tauscht den Vorschlag');
+
+// 6. Ein Tipp kopiert genau den gezeigten Text und führt direkt ins Google-Fenster.
 await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
 await p.route('**://*.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<html>stub</html>' }));
 await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
-check(await p.locator('#go').isDisabled(), 'Button ist gesperrt, solange nichts eingetragen ist');
-
-await p.locator('.chips').first().locator('.chip').first().click();
-check(await p.locator('#go').isDisabled(), 'ein Stichwort allein reicht nicht');
-
-await p.locator('#a1').fill('Fassade gestrichen und Fenster lackiert');
-await p.locator('#a2').fill('pünktlich, sauber, faire Beratung');
-const preview = (await p.locator('#prev').innerText()).trim();
-check(preview === 'Fassade gestrichen und Fenster lackiert. Pünktlich, sauber, faire Beratung.',
-  `Vorschau: "${preview}"`);
-check(await p.locator('#go').isEnabled(), 'Button ist frei, sobald beide Fragen beantwortet sind');
-
-// 3. Chips only insert short fragments, never finished sentences.
-const frags = await p.locator('.chip').allInnerTexts();
-const longest = frags.reduce((a, b) => (a.length > b.length ? a : b));
-check(!frags.some((f) => /[.!?]$/.test(f)) && longest.length <= 24,
-  `Stichworte sind Fragmente, längstes: "${longest}"`);
-
-// 4. Tapping a chip appends to the right field.
-await p.locator('#a1').fill('');
-await p.locator('.chips').first().locator('.chip').nth(1).click();
-await p.locator('.chips').first().locator('.chip').nth(6).click();
-check((await p.locator('#a1').inputValue()) === 'Fassade gestrichen, in Hamburg', 'Stichworte hängen sich an');
-
-// 5. The button copies exactly the preview and goes to Google's review dialog.
-await p.locator('#a2').fill('sehr pünktlich und sauber');
-const shown = (await p.locator('#prev').innerText()).trim();
+const shown = (await p.locator('#quote').innerText()).trim();
 await p.locator('#go').click();
 const clip = await p.evaluate(() => navigator.clipboard.readText()).catch(() => '<unreadable>');
 await p.waitForURL(/google\.com/, { timeout: 6000 }).catch(() => {});
-check(clip.trim() === shown, 'Zwischenablage enthält genau die Vorschau');
-check(/search\.google\.com\/local\/writereview\?placeid=/.test(p.url()), `Ziel: ${p.url().slice(0, 70)}`);
+check(clip.trim() === shown, 'Zwischenablage enthält genau den gezeigten Text');
+check(/search\.google\.com\/local\/writereview\?placeid=/.test(p.url()), `Ziel: ${p.url().slice(0, 68)}`);
 
-// 6. The older generated-suggestion page is still reachable for comparison.
-const seen = new Set();
-for (let i = 0; i < 8; i++) {
-  await p.goto(`${BASE}/r/hantke?vorschlag=1`, { waitUntil: 'domcontentloaded' });
-  seen.add((await p.locator('#quote').innerText()).trim());
-}
-check(seen.size >= 7, `?vorschlag=1 liefert weiter wechselnde Texte (${seen.size}/8)`);
+// 6b. Die Selbst-schreiben-Variante bleibt erreichbar.
+await p.goto(`${BASE}/r/hantke?selbst=1`, { waitUntil: 'networkidle' });
+check((await p.locator('textarea').count()) === 2 && (await p.locator('#go').isDisabled()),
+  '?selbst=1 liefert weiter den Fragen-Modus');
 
 // 7. Every company with a placeId links straight to the review dialog.
 for (const c of companies.filter((x) => x.placeId)) {
@@ -89,11 +96,6 @@ for (const c of companies.filter((x) => x.placeId)) {
   const href = await p.locator('#plain').getAttribute('href');
   check(href.includes(`writereview?placeid=${c.placeId}`), `direkter Review-Link ${c.slug}`);
 }
-
-// 6. Generated text must never contain an unreplaced placeholder.
-let holes = 0;
-for (const c of companies) for (let i = 0; i < 300; i++) if (buildReview(c, Math.random).includes('{')) holes++;
-check(holes === 0, `2700 Texte ohne Platzhalter-Reste (${holes} Treffer)`);
 
 if (bad.length) { console.log('HTTP-Fehler:\n' + bad.join('\n')); fail++; }
 if (errs.length) { console.log('JS-Fehler:\n' + errs.join('\n')); fail++; }

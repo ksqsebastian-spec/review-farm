@@ -36,15 +36,15 @@ export default {
 
     if (path === '/') return html(indexPage(), 'public, max-age=300');
 
-    // Default is prompt mode: the customer writes the review themselves.
-    // ?vorschlag=1 still serves the older generated-suggestion page for comparison;
-    // its text is built per request, so that variant must never be cached.
+    // Standard ist der fertige Vorschlag - ein Tipp, fertig. Er wird pro Aufruf
+    // neu erzeugt, darf also nie gecacht werden. ?selbst=1 liefert stattdessen
+    // die Variante, bei der der Kunde den Text über zwei Fragen selbst schreibt.
     const review = path.match(/^\/r\/([a-z0-9-]+)$/);
     if (review && bySlug[review[1]]) {
       const c = bySlug[review[1]];
-      return url.searchParams.has('vorschlag')
-        ? html(reviewPage(c), 'no-store')
-        : html(promptPage(c), 'public, max-age=300');
+      return url.searchParams.has('selbst')
+        ? html(promptPage(c), 'public, max-age=300')
+        : html(reviewPage(c), 'no-store');
     }
 
     const staff = path.match(/^\/([a-z0-9-]+)$/);

@@ -39,7 +39,7 @@ h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 2px}
   word-break:break-all;text-align:center}
 .stars{font-size:17px;letter-spacing:3px;color:#111;margin:0 0 10px;text-align:center}
 .lead{margin:0 0 22px;text-align:center;color:#444}
-.quote{border:1px solid #e5e5e5;padding:17px 18px;font-size:16px;line-height:1.6}
+.quote{border:1px solid #e5e5e5;padding:17px 18px;font-size:16px;line-height:1.62}
 .act{display:block;width:100%;margin-top:14px;padding:16px 14px;border:1px solid #111;background:#111;
   color:#fff;font:inherit;font-weight:500;text-align:center;text-decoration:none;cursor:pointer;
   -webkit-appearance:none;appearance:none;border-radius:0}
@@ -132,7 +132,8 @@ export function reviewPage(c) {
   // Rendered fresh per request (the page is sent no-store), so every customer who
   // opens the QR link gets a different suggestion even without JavaScript.
   const first = buildReview(c, Math.random);
-  const grammar = { open: c.open, quality: c.quality, extra: c.extra, close: c.close };
+  const grammar = { open: c.open, extra: c.extra, quality: c.quality,
+    recommend: c.recommend, closer: c.closer, join: c.join };
   return page({
     title: `${c.name} bewerten`,
     description: `Bewerten Sie ${c.name} in wenigen Sekunden bei Google.`,

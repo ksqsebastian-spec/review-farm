@@ -1,3 +1,5 @@
+import { phrasesFor, JOIN } from './phrases.js';
+
 // One entry per Gruppenwerk company with a Google Business Profile.
 //
 // placeId: verified against Google Maps — each one was resolved back to the
@@ -59,6 +61,11 @@ export const companies = [
       ['Boden verlegen und Wände streichen – Maler Hantke hat beides gemacht.', 'Bodenverlegung in Hamburg', 'einen Malerbetrieb in Hamburg'],
       ['Maler Hantke hat unsere Altbauwohnung vor dem Einzug renoviert.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg'],
       ['Nach dem Umbau hat Maler Hantke bei uns Malerarbeiten und die Küchenmontage erledigt.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Die Decken und Wände in unserer Wohnung hat Maler Hantke frisch gestrichen.', 'Malerarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Maler Hantke hat unser Ladenlokal über Nacht renoviert.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Wir haben die Fenster und Zargen von Maler Hantke lackieren lassen.', 'Lackierarbeiten in Hamburg', 'einen Maler in Hamburg'],
+      ['Nach dem Auszug hat Maler Hantke die Wohnung wieder hergerichtet.', 'Malerarbeiten in Hamburg', 'einen Malerbetrieb in Hamburg'],
+      ['Maler Hantke hat bei uns Raufaser entfernt und die Wände geglättet.', 'Tapezierarbeiten in Hamburg', 'Malerarbeiten in Hamburg'],
     ],
     quality: CRAFT_QUALITY,
     extra: [
@@ -92,6 +99,11 @@ export const companies = [
       ['Ein Fenster ließ sich nicht mehr schließen, Brink hat es wieder eingestellt.', 'Fensterreparatur in Hamburg', 'einen Fenster-Notdienst in Hamburg'],
       ['Als Hausverwaltung lassen wir Fenster und Türen regelmäßig von Brink prüfen.', 'Fensterwartung in Hamburg', 'Fenster und Türen in Hamburg'],
       ['Die Tischlerei Brink hat bei uns eine Innentür angepasst und neu eingebaut.', 'eine Tischlerei in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Bei uns hat Brink die Beschläge an allen Fenstern nachgestellt.', 'Fensterwartung in Hamburg', 'Fensterreparatur in Hamburg'],
+      ['Die Tischlerei Brink hat unsere Balkontür wieder gangbar gemacht.', 'Fensterreparatur in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Wir haben die Fenster im Treppenhaus von Brink überholen lassen.', 'Fensterwartung in Hamburg', 'eine Tischlerei in Hamburg'],
+      ['Brink hat bei uns abschließbare Fenstergriffe montiert.', 'Einbruchschutz an Fenstern in Hamburg', 'Fenster und Türen in Hamburg'],
+      ['Nach einem Sturmschaden hat Brink das Fenster noch am selben Tag gesichert.', 'einen Fenster-Notdienst in Hamburg', 'Fensterreparatur in Hamburg'],
     ],
     quality: CRAFT_QUALITY,
     extra: [
@@ -125,6 +137,11 @@ export const companies = [
       ['Seehafer Elemente hat uns bei Brandschutztüren beraten und sie eingebaut.', 'Objekttüren in Hamburg', 'Türen und Fenster in Hamburg'],
       ['Wir haben die Fenster in unserem Hotel von Seehafer Elemente warten lassen.', 'die Wartung von Türen in Hamburg', 'einen Fensterbauer in Hamburg'],
       ['Nach einem Schaden hat Seehafer Elemente unsere Tür kurzfristig repariert.', 'Türreparaturen in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Seehafer Elemente hat die Haustüranlage unserer Wohnanlage ersetzt.', 'Objekttüren in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Wir haben die Wartung der Brandschutztüren an Seehafer Elemente vergeben.', 'die Wartung von Türen in Hamburg', 'Objekttüren in Hamburg'],
+      ['Seehafer Elemente hat bei uns defekte Türbänder ausgetauscht.', 'Türreparaturen in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Die Fenster in unserem Verwaltungsgebäude wurden von Seehafer Elemente erneuert.', 'einen Fensterbauer in Hamburg', 'Türen und Fenster in Hamburg'],
+      ['Seehafer Elemente hat die Schließanlage neu eingestellt.', 'Türreparaturen in Hamburg', 'die Wartung von Türen in Hamburg'],
     ],
     quality: CRAFT_QUALITY,
     extra: [
@@ -158,6 +175,11 @@ export const companies = [
       ['Die Sanierung unseres Treppenhauses lief komplett über Werner Bau.', 'Gebäudesanierung in Hamburg', 'Altbausanierung in Hamburg'],
       ['Werner Bau hat bei uns alle Gewerke koordiniert – von Putz bis Fliesen.', 'ein Bauunternehmen in Hamburg', 'Gebäudesanierung in Hamburg'],
       ['Wir haben eine denkmalgeschützte Fassade von Werner Bau sanieren lassen.', 'Fassadensanierung in Hamburg', 'Altbausanierung in Hamburg'],
+      ['Werner Bau hat die Giebelwand unseres Hauses neu verputzt.', 'Fassadensanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
+      ['Wir haben die Kellersanierung von Werner Bau ausführen lassen.', 'Gebäudesanierung in Hamburg', 'ein Bauunternehmen in Hamburg'],
+      ['Werner Bau hat bei uns Risse im Mauerwerk fachgerecht geschlossen.', 'Fassadensanierung in Hamburg', 'Altbausanierung in Hamburg'],
+      ['Die Sanierung unserer Gewerbehalle lief über Werner Bau.', 'ein Bauunternehmen in Hamburg', 'Gebäudesanierung in Hamburg'],
+      ['Werner Bau hat das Dachgesims unseres Altbaus instand gesetzt.', 'Altbausanierung in Hamburg', 'Fassadensanierung in Hamburg'],
     ],
     quality: CRAFT_QUALITY,
     extra: [
@@ -191,6 +213,11 @@ export const companies = [
       ['Das Gerüst für unsere Klinkerfassade kam von J. Werner Gerüstbau.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
       ['Werner Gerüstbau hat auf- und nach Absprache sofort wieder abgebaut.', 'Gerüstbau in Hamburg', 'Gerüste im Hamburger Umland'],
       ['Wir haben für unser Bauvorhaben mit J. Werner Gerüstbau gearbeitet.', 'Gerüstbau in Hamburg', 'Gerüste im Hamburger Umland'],
+      ['Werner Gerüstbau hat unser Mehrfamilienhaus komplett eingerüstet.', 'Fassadengerüste in Hamburg', 'Gerüstbau in Hamburg'],
+      ['Für die Dachdecker hat Werner Gerüstbau das Gerüst samt Schutznetz gestellt.', 'Gerüstbau in Hamburg', 'einen Gerüstbauer in Hamburg'],
+      ['Wir haben das Gerüst für unsere Malerarbeiten bei Werner Gerüstbau bestellt.', 'Gerüstbau in Hamburg', 'Fassadengerüste in Hamburg'],
+      ['Werner Gerüstbau hat bei uns ein Gerüst im engen Hinterhof aufgebaut.', 'einen Gerüstbauer in Hamburg', 'Gerüste im Hamburger Umland'],
+      ['Das Gerüst für unser Bauvorhaben im Umland kam von Werner Gerüstbau.', 'Gerüste im Hamburger Umland', 'Gerüstbau in Hamburg'],
     ],
     quality: [
       'Aufbau pünktlich, das Gerüst stand sicher, Abbau nach Absprache sofort.',
@@ -232,6 +259,11 @@ export const companies = [
       ['Wir haben unseren Ladenbau von Mehlig machen lassen.', 'Objekteinrichtung im Raum Hamburg', 'Innenausbau im Raum Hamburg'],
       ['Mehlig hat bei uns Wandverkleidungen und Einbauten gefertigt.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei im Kreis Pinneberg'],
       ['Vom Entwurf bis zur Montage lief alles über die Tischlerei Mehlig.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei in Moorrege'],
+      ['Die Tischlerei Mehlig hat unsere Garderobe nach Maß gebaut.', 'Möbel nach Maß bei Hamburg', 'eine Tischlerei in Moorrege'],
+      ['Wir haben den Empfangstresen für unser Büro bei Mehlig bauen lassen.', 'Objekteinrichtung im Raum Hamburg', 'Innenausbau im Raum Hamburg'],
+      ['Mehlig hat unser Dachgeschoss komplett ausgebaut.', 'Innenausbau im Raum Hamburg', 'eine Tischlerei im Kreis Pinneberg'],
+      ['Die Tischlerei Mehlig hat unsere Praxiseinrichtung gefertigt und montiert.', 'Objekteinrichtung im Raum Hamburg', 'Möbel nach Maß bei Hamburg'],
+      ['Für unsere Ferienwohnung hat Mehlig die komplette Einrichtung gebaut.', 'Innenausbau im Raum Hamburg', 'Möbel nach Maß bei Hamburg'],
     ],
     quality: [
       'Handwerklich auf einem sehr hohen Niveau verarbeitet.',
@@ -273,6 +305,11 @@ export const companies = [
       ['Der Ausbau unseres Dachgeschosses wurde von Gruppenwerk BSI gesteuert.', 'Bauleitung in Hamburg', 'Bausanierung in Hamburg'],
       ['Gruppenwerk BSI hat die Sanierung unseres Mehrfamilienhauses koordiniert.', 'Bausanierung in Hamburg', 'Bauleitung in Hamburg'],
       ['Bei unklarer Feuchtigkeit hat Gruppenwerk BSI die Ursache gefunden.', 'Leckortung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Gruppenwerk BSI hat den Dachgeschossausbau von der Planung bis zur Abnahme betreut.', 'Bauleitung in Hamburg', 'Sanierungsplanung in Hamburg'],
+      ['Wir haben die Bauleitung für unsere Modernisierung an Gruppenwerk BSI gegeben.', 'Bauleitung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Gruppenwerk BSI hat den Feuchteschaden in unserem Keller geortet.', 'Leckortung in Hamburg', 'Bausanierung in Hamburg'],
+      ['Die Genehmigungsplanung für unseren Anbau kam von Gruppenwerk BSI.', 'einen Bauantrag in Hamburg', 'Sanierungsplanung in Hamburg'],
+      ['Gruppenwerk BSI hat unser Gewerbeobjekt umgebaut und die Abnahme begleitet.', 'Bausanierung in Hamburg', 'Bauleitung in Hamburg'],
     ],
     quality: [
       'Klare Ansagen, realistische Termine und ein gutes Ergebnis.',
@@ -287,7 +324,7 @@ export const companies = [
     extra: [
       'Die Leckortung lief ohne die halbe Wohnung aufzureißen.',
       'Der Bauantrag ist reibungslos durchgegangen.',
-      'Es wurde ehrlich gesagt, was sich lohnt und was nicht.',
+      'Uns wurde klar gesagt, welche Maßnahme sich rechnet und welche nicht.',
       'Auch die Handwerker vor Ort waren gut organisiert.',
     ],
     close: CLOSERS,
@@ -314,6 +351,11 @@ export const companies = [
       ['GroundPassion begleitet unsere Kapitalanlage seit dem Kauf.', 'Kapitalanlagen in Hamburg', 'Immobilien-Investment in Hamburg'],
       ['Die Standortanalyse für unser Objekt kam von GroundPassion.', 'Anlageimmobilien in Hamburg', 'Immobilien-Investment in Hamburg'],
       ['Wir haben uns von GroundPassion zu einem Objekt in Hamburg beraten lassen.', 'eine Immobilienberatung in Hamburg', 'Kapitalanlagen in Hamburg'],
+      ['GroundPassion hat uns durch die gesamte Finanzierung begleitet.', 'Kapitalanlagen in Hamburg', 'eine Immobilienberatung in Hamburg'],
+      ['Wir haben zwei Objekte von GroundPassion prüfen lassen.', 'Anlageimmobilien in Hamburg', 'eine Immobilienberatung in Hamburg'],
+      ['GroundPassion hat unsere Wohnung neu vermietet und die Verwaltung übernommen.', 'Kapitalanlagen in Hamburg', 'Immobilien-Investment in Hamburg'],
+      ['Die Kalkulation für unser erstes Investment kam von GroundPassion.', 'Immobilien-Investment in Hamburg', 'Anlageimmobilien in Hamburg'],
+      ['GroundPassion hat uns beim Ausstieg aus einem Objekt beraten.', 'eine Immobilienberatung in Hamburg', 'Immobilien-Investment in Hamburg'],
     ],
     quality: [
       'Fundierte Analysen, realistische Zahlen und kein Verkaufsdruck.',
@@ -352,6 +394,11 @@ export const companies = [
       ['Als Freiberufler sitze ich bei Gruppenwerk Networking.', 'einen Büroplatz in Hamburg', 'Coworking in Hamburg'],
       ['Unser Start-up hat bei Gruppenwerk Networking Büroräume bezogen.', 'ein Büro in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],
       ['Wir nutzen die Meetingräume von Gruppenwerk Networking regelmäßig.', 'Coworking in Hamburg', 'ein Büro in Hamburg'],
+      ['Wir haben bei Gruppenwerk Networking zwei feste Arbeitsplätze gemietet.', 'einen Büroplatz in Hamburg', 'Coworking in Hamburg'],
+      ['Unser Architekturbüro sitzt seit einem Jahr bei Gruppenwerk Networking.', 'ein Büro in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],
+      ['Gruppenwerk Networking ist unser Standort für Kundentermine geworden.', 'ein Büro in Hamburg', 'Coworking in Hamburg'],
+      ['Wir nutzen hier Büro und Meetingräume für unser kleines Team.', 'Coworking in Hamburg', 'einen Büroplatz in Hamburg'],
+      ['Als Projektentwickler habe ich hier meinen Arbeitsplatz.', 'einen Büroplatz in Hamburg', 'Coworking in der Bau- und Immobilienbranche'],
     ],
     quality: [
       'Modernes Büro, schnelles Internet und gute Meetingräume.',
@@ -369,6 +416,9 @@ export const companies = [
     close: CLOSERS,
   },
 ];
+
+// Jeder Betrieb bekommt seinen eigenen, überschneidungsfreien Anteil am Wortmaterial.
+companies.forEach((c, i) => Object.assign(c, phrasesFor(i, companies.length), { join: JOIN }));
 
 export const bySlug = Object.fromEntries(companies.map((c) => [c.slug, c]));
 

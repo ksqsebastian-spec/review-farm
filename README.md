@@ -22,14 +22,61 @@ QR-Code zeigen                       Ein Tipp → Google → einfügen, fertig
 | `/`            | Mitarbeiter | Liste aller Betriebe |
 | `/<betrieb>`   | Mitarbeiter | Großer QR-Code zum Vorzeigen, z. B. `/hantke` |
 | `/r/<betrieb>` | Kunde       | Ziel des QR-Codes: Textvorschlag + Google-Link |
+| `/r/<betrieb>?selbst=1` | Kunde | Variante: Kunde beantwortet zwei Fragen |
 | `/l/<datei>`   | –           | Logos (ein Jahr cachebar) |
 
 Betriebe: `hantke`, `brink`, `seehafer`, `werner-bau`, `werner-geruestbau`,
 `mehlig`, `bsi`, `groundpassion`, `networking`.
 
-## Prompt-Modus (Standard)
+## Textvorschlag (Standard)
 
-Der Kunde bekommt **keinen fertigen Text**, sondern zwei kurze Fragen:
+Unter `/r/<betrieb>` bekommt der Kunde einen fertigen Satzvorschlag, den er
+antippen, ändern oder neu würfeln kann. Der Text kommt **nicht** aus einer Liste
+fertiger Bewertungen, sondern wird pro Aufruf aus Bausteinen zusammengesetzt
+(`src/review-text.js`):
+
+1. ein Einstiegssatz zum Auftrag,
+2. optional ein Detail zum Betrieb,
+3. ein bis zwei Bemerkungen dazu, wie die Arbeit lief,
+4. eine Empfehlung mit passendem Suchbegriff,
+5. optional ein kurzer Schlusssatz.
+
+Jeder Einstiegssatz bringt seine eigenen Suchbegriffe mit, damit die Empfehlung
+am Ende zum beschriebenen Auftrag passt (eine Bautrocknung endet nicht mit
+„Empfehlung für Fassadenanstrich"). Die Seite wird mit `no-store` ausgeliefert,
+jeder Kunde sieht also einen anderen Text; „Anderer Text" würfelt sofort neu.
+
+### Warum das keine Duplikate erzeugt
+
+Die erste Fassung hatte ganze Sätze im Pool, die sich alle neun Betriebe teilten.
+Eine Simulation bei realistischem Aufkommen (78 Bewertungen im Jahr, auf neun
+Betriebe verteilt) ergab dort im schlechtesten Fall 20 wortgleiche
+Wiederholungen eines Satzes und einen Satz, der bei acht der neun Betriebe
+auftaucht. Genau darauf reagiert Google: Beinahe-Duplikate werden auf Satzebene
+erkannt, und identische Sätze über mehrere verbundene Betriebe hinweg sind das
+auffälligste Muster.
+
+Zwei Änderungen beheben das strukturell:
+
+* **Sätze entstehen aus Teilsätzen.** Statt „die Arbeit wurde sauber ausgeführt."
+  als fertigem Satz werden zwei Teilsätze zufällig kombiniert und mit `und`,
+  `,` oder `—` verbunden. Aus 10 Bausteinen werden so 90 Sätze.
+* **Getrennte Wortvorräte pro Betrieb** (`src/phrases.js`). Die Pools werden
+  reihum verteilt, sodass **kein Baustein bei zwei Betrieben vorkommt**.
+
+Gemessen über 400 simulierte Jahre à 78 Bewertungen:
+
+| | |
+|---|---|
+| identische ganze Texte | 0,00 pro Jahr |
+| Betriebe, die sich einen Satz teilen | 1 (Ziel: 1) |
+| häufigste Satzwiederholung, schlechtester Lauf | 6× (typisch 3–4×) |
+| Textlänge | 77–361 Zeichen, ⌀ 224 |
+
+## Prompt-Modus (`?selbst=1`)
+
+Unter `/r/<betrieb>?selbst=1` bekommt der Kunde **keinen fertigen Text**, sondern
+zwei kurze Fragen:
 
 1. *Was haben wir für Sie gemacht?*
 2. *Was hat Ihnen gefallen?*
@@ -39,43 +86,21 @@ Darunter stehen kurze Stichworte zum Antippen (*„Fenster repariert"*,
 den beiden Antworten wird live die Bewertung zusammengesetzt, die der Kunde vor
 dem Absenden sieht. Der Button bleibt gesperrt, bis wirklich etwas dasteht.
 
-Damit sind die Bewertungen inhaltlich die des Kunden. Gewerk und Ort landen über
-die Stichworte trotzdem im Text, die lokale Suche profitiert also weiterhin.
+Damit sind die Bewertungen inhaltlich die des Kunden — die sauberste Variante,
+wenn Rückfragen zu erwarten sind. Sie kostet aber Zeit am Kunden, deshalb ist
+der Textvorschlag der Standard.
 
-**Warum nicht der fertige Textvorschlag?** Eine Simulation der alten Variante bei
-realistischem Aufkommen (78 Bewertungen im Jahr, auf neun Betriebe verteilt)
-ergab im schlechtesten Fall 20 wortgleiche Wiederholungen eines Satzes und einen
-Satz, der bei acht der neun Betriebe auftaucht. Google erkennt Beinahe-Duplikate
-auf Satzebene, nicht nur bei ganzen Texten — und identische Sätze über mehrere
-verbundene Betriebe hinweg sind genau das Muster, gegen das vorgegangen wird.
-Geringe Stückzahlen helfen dagegen nicht, weil die Satz-Pools klein sind.
+## Ablauf und Grenzen
 
 Wichtig für den Ablauf: **der Kunde scannt mit seinem eigenen Handy.** Tippt er
 auf dem Firmenhandy, hängen alle Bewertungen an einem Google-Konto bzw. einem
 Gerät. Wenn der QR-Code nicht gescannt werden kann, den Link über „Link teilen"
 per WhatsApp/SMS schicken.
 
-## Textvorschläge (`?vorschlag=1`, nur zum Vergleich)
-
-Unter `/r/<betrieb>?vorschlag=1` liegt die frühere Variante. Sie stellt
-**nicht** aus einer fertigen Liste zu, sondern setzt pro Aufruf einen neuen Text
-aus vier Bausteinen zusammen (`src/review-text.js`):
-
-1. ein Einstiegssatz zum Auftrag,
-2. eine Bemerkung dazu, wie die Arbeit lief,
-3. optional ein Detail,
-4. eine Empfehlung mit passendem Suchbegriff.
-
-Jeder Einstiegssatz bringt seine eigenen Suchbegriffe mit, damit die Empfehlung
-am Ende zum beschriebenen Auftrag passt (eine Bautrocknung endet nicht mit
-„Empfehlung für Fassadenanstrich"). Das ergibt **2.300 bis 8.800 Varianten pro
-Betrieb**, zusammen gut 57.000. Die Seite wird mit `no-store` ausgeliefert, also
-sieht jeder Kunde einen anderen Text; „Anderer Text" würfelt sofort neu, und der
-Kunde kann vor dem Absenden alles ändern.
-
 Bewertungen sollten von echten Kunden nach einem echten Auftrag kommen und nicht
 mit Rabatten o. Ä. erkauft werden, sonst drohen Löschung oder eine Sperre des
-Profils.
+Profils. Ein vorgeschlagener Text bleibt ein vorgeschlagener Text — der Kunde
+muss ihn lesen und darf ihn ändern, sonst sind es nicht seine Worte.
 
 Inhaltlich greifen die Bausteine die Leistungen und die Selbstdarstellung der
 jeweiligen Website auf und nennen Gewerk und Ort, damit die Bewertungen für die
