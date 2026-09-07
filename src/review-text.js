@@ -1,9 +1,10 @@
 // Baut einen Bewertungsvorschlag zusammen.
 //
-// Aufbau: Auftragssatz → (optional) Detail → Qualitätssatz aus zwei verbundenen
-// Hauptsätzen → (optional) Empfehlung → (optional) kurzer Schluss. Welche Teile
-// vorkommen, entscheidet der Zufall mit, damit die Texte auch in Länge und Form
-// variieren und nicht alle gleich gebaut wirken.
+// Der Text soll klingen, als hätte ihn jemand am Handy getippt: kurz, in der
+// Länge unterschiedlich, mal mit Empfehlung, mal ohne. Deshalb wird nicht immer
+// dasselbe Gerüst befüllt, sondern zuerst eine Satzform gewürfelt — sonst hat
+// jeder Text dieselbe Silhouette, und genau daran erkennt man generierten Text
+// schneller als an einzelnen Wörtern.
 //
 // Die Qualitäts-, Empfehlungs- und Schlussbausteine sind pro Betrieb exklusiv
 // (siehe src/phrases.js), deshalb kann derselbe Satz nie bei zwei Betrieben der
@@ -19,20 +20,50 @@ export function buildReview(g, rnd) {
   var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
 
   var job = pick(g.open);              // [Satz, ...passende Suchbegriffe]
-  var out = [job[0]];
+  var kw = pick(job.slice(1));
 
-  if (g.extra && g.extra.length && rnd() < 0.45) out.push(pick(g.extra));
-
-  // Zwei verschiedene Bausteine, zufällig verbunden - das trägt die meiste Varianz.
+  // Zwei verschiedene Bausteine, zufällig verbunden. Bei '. ' werden daraus
+  // zwei kurze Sätze, was den Rhythmus deutlich mehr aufbricht als ein Komma.
   var rest = g.quality.slice();
-  var first = rest.splice(Math.floor(rnd() * rest.length), 1)[0];
-  var quality = rnd() < 0.82 ? first + pick(g.join) + pick(rest) : first;
-  out.push(cap(quality) + '.');
+  var a = rest.splice(Math.floor(rnd() * rest.length), 1)[0];
+  var quality;
+  if (rnd() < 0.28) {
+    quality = cap(a) + '.';
+  } else {
+    var b = pick(rest);
+    var join = pick(g.join);
+    quality = join === '. ' ? cap(a) + '. ' + cap(b) + '.' : cap(a) + join + b + '.';
+  }
 
-  if (rnd() < 0.85) out.push(cap(pick(g.recommend).replace('{kw}', pick(job.slice(1)))) + '.');
-  if (rnd() < 0.4) out.push(pick(g.closer));
+  var recommend = cap(pick(g.recommend).replace('{kw}', kw)) + '.';
+  var closer = pick(g.closer);
 
-  return out.join(' ');
+  // Satzform würfeln. Kurze Bewertungen sind der Normalfall, nicht die Ausnahme.
+  // Wenn etwas vor dem Auftragssatz steht, dann ein Schlussbaustein: die sind
+  // alle Urteile ("Alles bestens.") und funktionieren als Einstieg. Ein
+  // Qualitätsbaustein vorn ("Termine wurden von sich aus bestätigt.") würde
+  // dagegen von etwas reden, das der Leser noch gar nicht kennt.
+  var out;
+  var shape = rnd();
+  if (shape < 0.16) out = [job[0], quality];
+  else if (shape < 0.30) out = [job[0], quality, closer];
+  else if (shape < 0.46) out = [closer, job[0], quality];
+  else if (shape < 0.58) out = [job[0], recommend, closer];
+  else {
+    out = [job[0], quality, recommend];
+    if (rnd() < 0.35) out.push(closer);
+  }
+  if (out.indexOf(recommend) < 0 && rnd() < 0.45) out.push(recommend);
+
+  // Ein Detail zum Betrieb schiebt sich gelegentlich hinter den Auftragssatz.
+  if (g.extra && g.extra.length && rnd() < 0.28) {
+    var at = out.indexOf(job[0]);
+    if (at >= 0) out.splice(at + 1, 0, pick(g.extra));
+  }
+
+  var text = out.join(' ');
+  if (rnd() < 0.12) text = text.replace(/\.$/, '!');
+  return text;
 }
 
 /** Grobe Zahl möglicher Texte - für den Bericht, nicht für die Logik. */

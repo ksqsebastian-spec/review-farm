@@ -41,10 +41,33 @@ fertiger Bewertungen, sondern wird pro Aufruf aus Bausteinen zusammengesetzt
 4. eine Empfehlung mit passendem Suchbegriff,
 5. optional ein kurzer Schlusssatz.
 
+Welche Teile vorkommen und in welcher Reihenfolge, würfelt der Generator
+mit — mal drei Sätze, mal einer. Sonst hat jeder Text dieselbe Silhouette,
+und daran erkennt man generierten Text schneller als an einzelnen Wörtern.
+
 Jeder Einstiegssatz bringt seine eigenen Suchbegriffe mit, damit die Empfehlung
 am Ende zum beschriebenen Auftrag passt (eine Bautrocknung endet nicht mit
 „Empfehlung für Fassadenanstrich"). Die Seite wird mit `no-store` ausgeliefert,
 jeder Kunde sieht also einen anderen Text; „Anderer Text" würfelt sofort neu.
+
+### Warum das nicht nach Werbetext klingt
+
+Die Bausteine sind in dem Register geschrieben, in dem Leute tatsächlich eine
+Bewertung tippen — kurz, gesprochen, oft ohne Artikel:
+
+> Treppenhaus neu streichen lassen, gemacht hat es Maler Hantke. Termin hat
+> gepasst und wir wurden gut informiert. Für einen Maler in Hamburg klare
+> Empfehlung.
+
+Konkret heißt das: keine Gedankenstriche (das deutlichste Erkennungszeichen für
+generierten Text), kein Amtsdeutsch wie „die Ausführung war handwerklich
+einwandfrei", verbfreie Aufzählungen statt vollständiger Nebensätze, gelegentlich
+ein Ausrufezeichen oder ein 👍, und Sätze, die auch mal mit dem Urteil anfangen
+statt mit dem Auftrag.
+
+Der Preis dafür: die Suchbegriffe stehen im Akkusativ („einen Maler in Hamburg"),
+also darf im Empfehlungssatz nur „für {kw}" oder ein Objekt davorstehen. Eine
+Dativ-Präposition ergibt „Bei ein Büro in Hamburg …". `test/e2e.mjs` prüft das.
 
 ### Warum das keine Duplikate erzeugt
 
@@ -59,8 +82,8 @@ auffälligste Muster.
 Zwei Änderungen beheben das strukturell:
 
 * **Sätze entstehen aus Teilsätzen.** Statt „die Arbeit wurde sauber ausgeführt."
-  als fertigem Satz werden zwei Teilsätze zufällig kombiniert und mit `und`,
-  `,` oder `—` verbunden. Aus 10 Bausteinen werden so 90 Sätze.
+  als fertigem Satz werden zwei Teilsätze zufällig kombiniert — mit `und`, mit
+  Komma, oder als zwei getrennte kurze Sätze. Aus 10 Bausteinen werden so 90.
 * **Getrennte Wortvorräte pro Betrieb** (`src/phrases.js`). Die Pools werden
   reihum verteilt, sodass **kein Baustein bei zwei Betrieben vorkommt**.
 
@@ -70,8 +93,8 @@ Gemessen über 400 simulierte Jahre à 78 Bewertungen:
 |---|---|
 | identische ganze Texte | 0,00 pro Jahr |
 | Betriebe, die sich einen Satz teilen | 1 (Ziel: 1) |
-| häufigste Satzwiederholung, schlechtester Lauf | 6× (typisch 3–4×) |
-| Textlänge | 77–361 Zeichen, ⌀ 224 |
+| häufigste Satzwiederholung, schlechtester Lauf | 7× (typisch 3–4×) |
+| Textlänge | 64–353 Zeichen, ⌀ 179 |
 
 ## Prompt-Modus (`?selbst=1`)
 

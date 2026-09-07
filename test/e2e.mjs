@@ -5,6 +5,7 @@ import { createServer } from 'node:http';
 import worker from '../dist/worker.js';
 import { companies } from '../src/companies.js';
 import { buildReview } from '../src/review-text.js';
+import { RECOMMEND } from '../src/phrases.js';
 
 const PORT = 8788;
 const BASE = `http://localhost:${PORT}`;
@@ -47,25 +48,42 @@ for (let i = 0; i < 15; i++) {
 check(seen.size >= 14, `15 Aufrufe -> ${seen.size} verschiedene Texte`);
 
 // 3. Kein Baustein taucht bei zwei Betrieben auf - das ist die eigentliche Absicherung.
+// Verglichen wird der fertige Satz, nicht der rohe Baustein: ein
+// kleingeschriebener Qualitätsbaustein und ein Schlusssatz können sich sonst
+// erst im Text treffen ("wir sind sehr zufrieden" -> "Wir sind sehr zufrieden.").
+const norm = (s) => {
+  const t = s.trim().replace('{kw}', 'X');
+  const c = t.charAt(0).toUpperCase() + t.slice(1);
+  return /[.!?\u{1F44D}]$/u.test(c) ? c : c + '.';
+};
 const owner = new Map();
 let shared = 0;
 for (const c of companies) {
-  for (const s of [...c.quality, ...c.recommend, ...c.closer, ...(c.extra || []), ...c.open.map((o) => o[0])]) {
-    if (owner.has(s) && owner.get(s) !== c.slug) shared++;
+  for (const raw of [...c.quality, ...c.recommend, ...c.closer, ...(c.extra || []), ...c.open.map((o) => o[0])]) {
+    const s = norm(raw);
+    if (owner.has(s) && owner.get(s) !== c.slug) { shared++; console.log('   doppelt:', s); }
     owner.set(s, c.slug);
   }
 }
 check(shared === 0, `keine gemeinsamen Bausteine zwischen Betrieben (${shared})`);
+
+// 3b. Die Suchbegriffe stehen im Akkusativ - eine Dativ-Präposition davor
+// erzeugt "Bei ein Büro in Hamburg ...". Deshalb darf {kw} nur hinter "für"
+// oder als Objekt stehen.
+const dativ = RECOMMEND.filter((r) => /\b(bei|mit|von|zu|nach|aus) \{kw\}/.test(r));
+check(dativ.length === 0, `keine Dativ-Präposition vor dem Suchbegriff (${dativ.join(' | ') || 'ok'})`);
 
 // 4. Texte enthalten nie einen unersetzten Platzhalter und sind vollständige Sätze.
 let broken = 0;
 for (const c of companies) {
   for (let i = 0; i < 400; i++) {
     const t = buildReview(c, Math.random);
-    if (t.includes('{') || !/[.!?]$/.test(t) || /\s\s/.test(t) || t.length < 60) broken++;
+    // Emoji-Schluss ist gewollt, Gedankenstriche sind es nicht - die sind das
+    // deutlichste Erkennungszeichen für generierten Text.
+    if (t.includes('{') || !/[.!?\u{1F44D}]$/u.test(t) || /\s\s/.test(t) || t.length < 40 || /[—–]/.test(t)) broken++;
   }
 }
-check(broken === 0, `3600 Texte ohne Platzhalter, doppelte Leerzeichen oder Bruchstücke (${broken})`);
+check(broken === 0, `3600 Texte ohne Platzhalter, Gedankenstriche oder Bruchstücke (${broken})`);
 
 // 5. "Anderer Text" tauscht den Vorschlag ohne Neuladen.
 await p.goto(`${BASE}/r/hantke`, { waitUntil: 'networkidle' });
